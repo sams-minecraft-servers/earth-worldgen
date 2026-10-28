@@ -15,6 +15,9 @@ longitude = X / blocks per degree
 latitude  = −Z / blocks per degree
 ```
 
+The [coordinate converter](https://sams-minecraft-servers.github.io/earth-worldgen/) does this for
+you, and can look places up by name.
+
 ## Examples at 1:5
 
 | Place | Latitude, longitude | X | Z |

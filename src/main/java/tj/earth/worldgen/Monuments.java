@@ -9,10 +9,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,7 +40,7 @@ public final class Monuments {
 
     /** One monument. Box and clear coordinates are relative to the block on the ground at its centre. */
     record Monument(String id, String name, String country, double latitude, double longitude, int x, int z, boolean seabed,
-                    short[] clear, short[] boxes, int[] palette) {}
+                    short[] clear, short[] boxes, int[] palette, String[] creatures, short[] creatureAt) {}
 
     private static volatile Map<Long, List<Monument>> byChunk;
     private static volatile BlockState[] states;
@@ -72,6 +79,38 @@ public final class Monuments {
                     for (int z = z1; z <= z2; z++)
                         for (int y = y1; y <= y2; y++)
                             chunk.setBlockState(pos.set(x, y, z), state, 2);
+            }
+        }
+    }
+
+    /**
+     * Puts in the creatures that live in monuments (villagers, golems...) whose spot is in this
+     * region's centre chunk, once its blocks are finished. Called where the game puts in a chunk's
+     * first animals.
+     */
+    public static void settle(final WorldGenRegion region) {
+        EarthConfig.MonumentSettings settings = EarthConfig.get().monuments;
+        if (!settings.enabled || region.getHeight() != net.minecraft.world.level.dimension.DimensionType.Y_SIZE) return;
+        ChunkPos at = region.getCenter();
+        List<Monument> here = index().get(at.pack());
+        if (here == null) return;
+        for (Monument m : here) {
+            if (m.creatures.length == 0 || settings.disabled.contains(m.id) || EarthConfig.listed(settings.disabledCountries, m.country)) continue;
+            int[] centre = centre(m);
+            int base = base(m, centre[0], centre[1]);
+            for (int i = 0; i < m.creatures.length; i++) {
+                int x = centre[0] + m.creatureAt[i * 3], y = base + m.creatureAt[i * 3 + 1], z = centre[1] + m.creatureAt[i * 3 + 2];
+                if (x >> 4 != at.x() || z >> 4 != at.z()) continue;
+                Optional<EntityType<?>> type = BuiltInRegistries.ENTITY_TYPE.getOptional(Identifier.parse(m.creatures[i]));
+                if (type.isEmpty()) continue;
+                Entity entity = type.get().create(region.getLevel(), EntitySpawnReason.STRUCTURE);
+                if (entity == null) continue;
+                entity.snapTo(x + 0.5, y, z + 0.5, 0f, 0f);
+                if (entity instanceof Mob mob) {
+                    mob.finalizeSpawn(region, region.getCurrentDifficultyAt(BlockPos.containing(x, y, z)), EntitySpawnReason.STRUCTURE, null);
+                    mob.setPersistenceRequired();
+                }
+                region.addFreshEntityWithPassengers(entity);
             }
         }
     }
@@ -154,7 +193,9 @@ public final class Monuments {
 
     private static void read(final InputStream raw, final List<Monument> into, final String what) throws IOException {
         DataInputStream in = new DataInputStream(new GZIPInputStream(raw, 1 << 16));
-        if (in.readInt() != 0x454d4f4e || in.readInt() != 1) throw new IOException(what + " is not a version 1 monuments file");
+        if (in.readInt() != 0x454d4f4e) throw new IOException(what + " is not a monuments file");
+        int version = in.readInt();
+        if (version < 1 || version > 2) throw new IOException(what + " is version " + version + ", which this mod does not know");
         int[] palette = new int[in.readInt()];
         synchronized (paletteIds) {
             for (int i = 0; i < palette.length; i++) {
@@ -174,7 +215,17 @@ public final class Monuments {
             for (int i = 0; i < 5; i++) clear[i] = in.readShort();
             short[] boxes = new short[in.readInt() * 7];
             for (int i = 0; i < boxes.length; i++) boxes[i] = in.readShort();
-            into.add(new Monument(id, name, country, lat, lon, x, z, seabed, clear, boxes, palette));
+            String[] creatures = new String[0];
+            short[] creatureAt = new short[0];
+            if (version >= 2) {
+                creatures = new String[in.readInt()];
+                creatureAt = new short[creatures.length * 3];
+                for (int i = 0; i < creatures.length; i++) {
+                    creatures[i] = in.readUTF();
+                    for (int k = 0; k < 3; k++) creatureAt[i * 3 + k] = in.readShort();
+                }
+            }
+            into.add(new Monument(id, name, country, lat, lon, x, z, seabed, clear, boxes, palette, creatures, creatureAt));
         }
     }
 }

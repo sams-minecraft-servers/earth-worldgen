@@ -10,6 +10,9 @@ world. The map is about 8 million by 4 million blocks.
 **Play it:** the mod runs the public server **earth.tj** (Minecraft Java Edition 26.3). Join with an
 ordinary, unmodified game.
 
+**Find a place:** the [coordinate converter](https://sams-minecraft-servers.github.io/earth-worldgen/) turns
+any real place, or a latitude and longitude, into the block to go to.
+
 ## What it does
 
 - **Real terrain from real heights.** The ground at each block column comes from one-degree

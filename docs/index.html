@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Earth Coordinates</title>
+<meta name="description" content="Turn any real place, or a latitude and longitude, into Minecraft block coordinates on the Earth Worldgen map (earth.tj), and back.">
+<style>
+:root {
+  --bg: #f6f7f9; --card: #ffffff; --ink: #17202a; --muted: #5b6673; --line: #dde2e8;
+  --accent: #0b7a75; --accent-ink: #ffffff; --field: #ffffff; --code: #eef2f5; --bad: #b42318;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1418; --card: #172027; --ink: #e8eef2; --muted: #9aa8b4; --line: #2a3640;
+    --accent: #3cc7bf; --accent-ink: #062b29; --field: #0f171c; --code: #0f171c; --bad: #ff8a80;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1418; --card: #172027; --ink: #e8eef2; --muted: #9aa8b4; --line: #2a3640;
+  --accent: #3cc7bf; --accent-ink: #062b29; --field: #0f171c; --code: #0f171c; --bad: #ff8a80;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
+h1 { font-size: 1.9rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+.lead { color: var(--muted); margin: 0 0 24px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.card h2 { font-size: 1.05rem; margin: 0 0 12px; }
+label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); color: var(--ink); font: inherit; }
+input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; align-items: end; }
+button { padding: 10px 14px; border: 0; border-radius: 8px; background: var(--accent); color: var(--accent-ink); font: inherit; font-weight: 600; cursor: pointer; white-space: nowrap; }
+button.quiet { background: transparent; color: var(--accent); border: 1px solid var(--line); }
+.out { margin-top: 14px; display: grid; gap: 8px; }
+.big { font: 600 1.4rem/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+.cmd { display: flex; gap: 8px; align-items: center; }
+code { background: var(--code); border-radius: 6px; padding: 8px 10px; font: .95rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; flex: 1; overflow-x: auto; white-space: nowrap; }
+.muted { color: var(--muted); font-size: .9rem; }
+.err { color: var(--bad); font-size: .9rem; }
+ul.hits { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 6px; }
+ul.hits button { width: 100%; text-align: left; font-weight: 500; background: transparent; color: var(--ink); border: 1px solid var(--line); }
+details { margin-top: 8px; }
+summary { cursor: pointer; color: var(--muted); }
+footer { color: var(--muted); font-size: .85rem; margin-top: 24px; }
+footer a, .lead a { color: var(--accent); }
+@media (max-width: 560px) { .row, .row3 { grid-template-columns: 1fr; } h1 { font-size: 1.6rem; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Earth Coordinates</h1>
+  <p class="lead">Find any real place on the Earth Worldgen map, the 1:5 Earth on <strong>earth.tj</strong>.
+    Type a place or a latitude and longitude to get the block to go to.</p>
+
+  <section class="card">
+    <h2>Find a place</h2>
+    <div class="row3">
+      <div><label for="q">Place name</label><input id="q" placeholder="Eiffel Tower, Tokyo, Grand Canyon…" autocomplete="off"></div>
+      <button id="search">Search</button>
+    </div>
+    <ul class="hits" id="hits"></ul>
+    <p class="err" id="searchErr" hidden></p>
+  </section>
+
+  <section class="card">
+    <h2>Latitude and longitude → blocks</h2>
+    <div class="row">
+      <div><label for="lat">Latitude (north is +)</label><input id="lat" inputmode="decimal" placeholder="48.8584"></div>
+      <div><label for="lon">Longitude (east is +)</label><input id="lon" inputmode="decimal" placeholder="2.2945"></div>
+    </div>
+    <p class="muted">You can also paste both at once, like <em>48.8584, 2.2945</em>, into either box.</p>
+    <div class="out" id="toBlocks" hidden>
+      <div class="big" id="xz"></div>
+      <div class="cmd"><code id="tp"></code><button class="quiet" data-copy="tp">Copy</button></div>
+      <p class="muted">Arrive high up (Y 600) so you don't land inside a mountain. New land takes a moment to appear.</p>
+    </div>
+    <p class="err" id="llErr" hidden></p>
+  </section>
+
+  <section class="card">
+    <h2>Blocks → latitude and longitude</h2>
+    <div class="row">
+      <div><label for="bx">X</label><input id="bx" inputmode="numeric" placeholder="51085"></div>
+      <div><label for="bz">Z</label><input id="bz" inputmode="numeric" placeholder="-1087778"></div>
+    </div>
+    <div class="out" id="toLatLon" hidden>
+      <div class="big" id="ll"></div>
+      <p class="muted"><a id="osm" target="_blank" rel="noopener">See this spot on OpenStreetMap</a></p>
+    </div>
+  </section>
+
+  <details>
+    <summary>Map scale (only change this for a server with a different scale)</summary>
+    <div class="card" style="margin-top:8px">
+      <label for="scale">Metres per block (earth.tj uses 5)</label>
+      <input id="scale" inputmode="decimal" value="5">
+    </div>
+  </details>
+
+  <footer>
+    The map is a plain latitude/longitude grid: X = longitude × blocks per degree, Z = −latitude × blocks per degree,
+    with 40,075,016.686 ÷ scale ÷ 360 blocks per degree (about 22,264 at 1:5).
+    Place search by <a href="https://nominatim.openstreetmap.org" rel="noopener">Nominatim</a>,
+    © <a href="https://www.openstreetmap.org/copyright" rel="noopener">OpenStreetMap contributors</a>.
+    <br><a href="https://github.com/sams-minecraft-servers/earth-worldgen">Earth Worldgen on GitHub</a> ·
+    <a href="https://github.com/sams-minecraft-servers/earth-worldgen/wiki">Wiki</a> ·
+    <a href="https://earth.tj">Play on earth.tj</a>
+    <br>Not an official Minecraft product. Not approved by or associated with Mojang or Microsoft.
+  </footer>
+</main>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var EQUATOR = 40075016.686;
+  function perDegree() { var s = parseFloat($('scale').value); return EQUATOR / (s > 0 ? s : 5) / 360; }
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function num(s) { return parseFloat(String(s).trim().replace(/[°NnEe\s]/g, '').replace(/[Ss]$/, '').replace(/[Ww]$/, '')); }
+
+  function signed(text, neg) { var v = num(text); if (/[SsWw]\s*$/.test(String(text).trim())) v = -Math.abs(v); return v; }
+
+  function showBlocks() {
+    var latText = $('lat').value, lonText = $('lon').value;
+    var pair = (latText + ' ' + lonText).match(/(-?\d+(?:\.\d+)?)\s*°?\s*([NSns])?\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*°?\s*([EWew])?/);
+    if (pair && (latText.indexOf(',') >= 0 || lonText.indexOf(',') >= 0)) {
+      var a = parseFloat(pair[1]) * (/[Ss]/.test(pair[2] || '') ? -1 : 1), b = parseFloat(pair[3]) * (/[Ww]/.test(pair[4] || '') ? -1 : 1);
+      $('lat').value = a; $('lon').value = b; latText = String(a); lonText = String(b);
+    }
+    var lat = signed(latText), lon = signed(lonText);
+    if (latText.trim() === '' || lonText.trim() === '') { $('toBlocks').hidden = true; $('llErr').hidden = true; return; }
+    if (!isFinite(lat) || !isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
+      $('toBlocks').hidden = true; $('llErr').hidden = false;
+      $('llErr').textContent = 'Latitude goes from -90 to 90 and longitude from -180 to 180.';
+      return;
+    }
+    $('llErr').hidden = true;
+    var d = perDegree(), x = Math.round(lon * d), z = Math.round(-lat * d);
+    $('xz').textContent = 'X ' + fmt(x) + '   Z ' + fmt(z);
+    $('tp').textContent = '/tp @s ' + x + ' 600 ' + z;
+    $('toBlocks').hidden = false;
+  }
+
+  function showLatLon() {
+    var x = parseFloat($('bx').value.replace(/,/g, '')), z = parseFloat($('bz').value.replace(/,/g, ''));
+    if (!isFinite(x) || !isFinite(z)) { $('toLatLon').hidden = true; return; }
+    var d = perDegree(), lat = -z / d, lon = x / d;
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) { $('toLatLon').hidden = true; return; }
+    $('ll').textContent = lat.toFixed(5) + ', ' + lon.toFixed(5);
+    $('osm').href = 'https://www.openstreetmap.org/?mlat=' + lat.toFixed(5) + '&mlon=' + lon.toFixed(5) + '#map=12/' + lat.toFixed(4) + '/' + lon.toFixed(4);
+    $('toLatLon').hidden = false;
+  }
+
+  var lastSearch = 0;
+  function search() {
+    var q = $('q').value.trim();
+    $('hits').innerHTML = ''; $('searchErr').hidden = true;
+    if (!q) return;
+    var wait = Math.max(0, 1100 - (Date.now() - lastSearch));   // Nominatim asks for at most one search a second
+    setTimeout(function () {
+      lastSearch = Date.now();
+      $('search').disabled = true;
+      fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=' + encodeURIComponent(q), { headers: { 'Accept-Language': navigator.language || 'en' } })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (list) {
+          if (!list.length) { $('searchErr').hidden = false; $('searchErr').textContent = 'Nothing found. Try a bigger place nearby, or type the latitude and longitude below.'; return; }
+          list.forEach(function (p) {
+            var li = document.createElement('li'), b = document.createElement('button');
+            b.textContent = p.display_name;
+            b.addEventListener('click', function () {
+              $('lat').value = (+p.lat).toFixed(5); $('lon').value = (+p.lon).toFixed(5); showBlocks();
+              $('toBlocks').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+            li.appendChild(b); $('hits').appendChild(li);
+          });
+        })
+        .catch(function () { $('searchErr').hidden = false; $('searchErr').textContent = 'The place search is not answering right now. Type the latitude and longitude below instead.'; })
+        .finally(function () { $('search').disabled = false; });
+    }, wait);
+  }
+
+  ['lat', 'lon', 'scale'].forEach(function (id) { $(id).addEventListener('input', function () { showBlocks(); showLatLon(); }); });
+  ['bx', 'bz'].forEach(function (id) { $(id).addEventListener('input', showLatLon); });
+  $('search').addEventListener('click', search);
+  $('q').addEventListener('keydown', function (e) { if (e.key === 'Enter') search(); });
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var text = $(b.getAttribute('data-copy')).textContent;
+      (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = 'Copy'; }, 1500); }, function () {});
+    });
+  });
+  var params = new URLSearchParams(location.search);
+  if (params.get('lat') && params.get('lon')) { $('lat').value = params.get('lat'); $('lon').value = params.get('lon'); showBlocks(); }
+})();
+</script>
+</body>
+</html>

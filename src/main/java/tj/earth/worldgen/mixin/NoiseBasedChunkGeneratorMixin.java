@@ -26,6 +26,7 @@ import tj.earth.worldgen.EarthCarvingMask;
 import tj.earth.worldgen.EarthFill;
 import tj.earth.worldgen.EarthFluids;
 import tj.earth.worldgen.Fauna;
+import tj.earth.worldgen.Monuments;
 
 /**
  * Gives the Earth dimension its own rule for where water stands (see EarthFluids), its own, much
@@ -57,6 +58,7 @@ abstract class NoiseBasedChunkGeneratorMixin {
         if (EarthFluids.isEarth(this.settings.value())) {
             CityVillagers.settle(region);
             Fauna.settleAxolotls(region);
+            Monuments.settle(region);
         }
     }
 
