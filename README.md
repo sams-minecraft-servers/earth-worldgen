@@ -68,6 +68,7 @@ Earth world. For a busy server, downloading the data in advance makes exploring 
 | [How it works](docs/How-it-works.md) | What each part of the mod does to world generation |
 | [Building from source](docs/Building-from-source.md) | Compiling the mod and running the test server |
 | [Updating Minecraft](docs/Updating-Minecraft.md) | Moving the mod to a new game version |
+| [Compatibility](docs/Compatibility.md) | Which other mods it has been tested with |
 | [FAQ and limitations](docs/FAQ-and-limitations.md) | Known limits and what has not been tested |
 
 ## Status

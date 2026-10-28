@@ -219,7 +219,7 @@ public final class Radio {
 
     /** Where a player is: a new country adds its station to their dial; the signal of what they listen to. */
     private static void where(final ServerPlayer player) {
-        if (player.level().getHeight() != DimensionType.Y_SIZE) return;
+        if (!Earth.is(player.level())) return;
         EarthConfig c = EarthConfig.get();
         double lat = c.latitude(player.getBlockZ()), lon = c.longitude(player.getBlockX());
         String here = Countries.at(lat, lon).toLowerCase();

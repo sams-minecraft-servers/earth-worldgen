@@ -1,5 +1,7 @@
 package tj.earth.worldgen.mixin;
 
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import tj.earth.worldgen.Earth;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -42,7 +44,7 @@ abstract class NoiseBasedChunkGeneratorMixin {
     @Inject(method = "doFill", at = @At("HEAD"), cancellable = true)
     private void earth$fill(final NoiseChunk noiseChunk, final ChunkAccess chunk, final CallbackInfo callback) {
         NoiseGeneratorSettings settings = this.settings.value();
-        if (EarthFluids.isEarth(settings)) {
+        if (Earth.is((ChunkGenerator) (Object) this)) {
             EarthFill.fill(settings, noiseChunk, chunk);
             callback.cancel();
         }
@@ -55,7 +57,7 @@ abstract class NoiseBasedChunkGeneratorMixin {
 
     @Inject(method = "spawnOriginalMobs", at = @At("TAIL"))
     private void earth$villagers(final WorldGenRegion region, final CallbackInfo callback) {
-        if (EarthFluids.isEarth(this.settings.value())) {
+        if (Earth.is((ChunkGenerator) (Object) this)) {
             CityVillagers.settle(region);
             Fauna.settleAxolotls(region);
             Monuments.settle(region);
@@ -65,6 +67,6 @@ abstract class NoiseBasedChunkGeneratorMixin {
     @Redirect(method = "generateCarvers", at = @At(value = "NEW", target = "net/minecraft/world/level/chunk/CarvingMask"))
     private CarvingMask earth$carvingMask(final int minY, final int maxY, final ChunkAccess chunk, final Blender blender, final NoiseChunk noiseChunk,
                                           final RandomState randomState, final BiomeManager biomeManager, final WorldGenRegion carverBiomeRegion, final MaterialRule materialRule) {
-        return chunk.getHeight() == DimensionType.Y_SIZE ? new EarthCarvingMask(minY, maxY, chunk.getPos()) : new CarvingMask(minY, maxY);
+        return Earth.is((ChunkGenerator) (Object) this) ? new EarthCarvingMask(minY, maxY, chunk.getPos()) : new CarvingMask(minY, maxY);
     }
 }

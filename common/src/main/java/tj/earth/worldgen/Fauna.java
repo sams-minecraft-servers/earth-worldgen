@@ -152,7 +152,7 @@ public final class Fauna {
     /** Axolotls in the lakes and canals of the Valley of Mexico (Xochimilco, Chalco), as a chunk is first made. */
     public static void settleAxolotls(final WorldGenRegion region) {
         if (!EarthConfig.get().animals.axolotls) return;
-        if (region.getHeight() != DimensionType.Y_SIZE) return;
+        if (!Earth.is(region.getLevel())) return;
         ChunkPos chunk = region.getCenter();
         EarthConfig config = EarthConfig.get();
         int x = chunk.getMiddleBlockX(), z = chunk.getMiddleBlockZ();
@@ -168,7 +168,9 @@ public final class Fauna {
             Mob axolotl = EntityTypes.AXOLOTL.create(region.getLevel(), EntitySpawnReason.CHUNK_GENERATION);
             if (axolotl == null) continue;
             axolotl.snapTo(bx + 0.5, pos.getY(), bz + 0.5, random.nextFloat() * 360f, 0f);
-            axolotl.finalizeSpawn(region, region.getCurrentDifficultyAt(pos), EntitySpawnReason.CHUNK_GENERATION, null);
+            synchronized (Earth.CREATURES) {
+                axolotl.finalizeSpawn(region, region.getCurrentDifficultyAt(pos), EntitySpawnReason.CHUNK_GENERATION, null);
+            }
             axolotl.setPersistenceRequired();
             region.addFreshEntityWithPassengers(axolotl);
         }

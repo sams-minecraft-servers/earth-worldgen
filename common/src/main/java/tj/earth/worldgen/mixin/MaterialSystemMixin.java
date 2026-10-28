@@ -1,5 +1,6 @@
 package tj.earth.worldgen.mixin;
 
+import tj.earth.worldgen.Earth;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.material.MaterialSystem;
@@ -17,6 +18,6 @@ import tj.earth.worldgen.EarthFill;
 abstract class MaterialSystemMixin {
     @Redirect(method = "buildSurface", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/ChunkAccess;getMinY()I"))
     private int earth$materialsFrom(final ChunkAccess chunk) {
-        return chunk.getHeight() == DimensionType.Y_SIZE ? EarthFill.materialsFrom(chunk) : chunk.getMinY();
+        return Earth.shaped(chunk) ? EarthFill.materialsFrom(chunk) : chunk.getMinY();
     }
 }

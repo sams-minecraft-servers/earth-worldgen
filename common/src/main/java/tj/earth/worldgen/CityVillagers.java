@@ -22,7 +22,7 @@ public final class CityVillagers {
     public static void settle(final WorldGenRegion region) {
         EarthConfig config = EarthConfig.get();
         float perChunk = config.villagersPerCityChunk;
-        if (region.getHeight() != DimensionType.Y_SIZE || !(perChunk > 0) || !config.cities.enabled || !config.cities.villagers) return;
+        if (!Earth.is(region.getLevel()) || !(perChunk > 0) || !config.cities.enabled || !config.cities.villagers) return;
         ChunkPos chunk = region.getCenter();
         if (EarthConfig.listed(config.cities.disabledCountries, Countries.atBlock(chunk.getMiddleBlockX(), chunk.getMiddleBlockZ()))) return;
 
@@ -49,7 +49,9 @@ public final class CityVillagers {
             Villager villager = EntityTypes.VILLAGER.create(region.getLevel(), EntitySpawnReason.CHUNK_GENERATION);
             if (villager == null) continue;
             villager.snapTo(x + 0.5, pos.getY(), z + 0.5, random.nextFloat() * 360f, 0f);
-            villager.finalizeSpawn(region, region.getCurrentDifficultyAt(pos), EntitySpawnReason.CHUNK_GENERATION, null);
+            synchronized (Earth.CREATURES) {
+                villager.finalizeSpawn(region, region.getCurrentDifficultyAt(pos), EntitySpawnReason.CHUNK_GENERATION, null);
+            }
             region.addFreshEntityWithPassengers(villager);
         }
     }

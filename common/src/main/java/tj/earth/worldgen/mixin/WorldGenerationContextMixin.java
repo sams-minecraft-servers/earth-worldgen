@@ -1,5 +1,10 @@
 package tj.earth.worldgen.mixin;
 
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Inject;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import tj.earth.worldgen.Earth;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.world.level.levelgen.WorldGenerationContext;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +19,17 @@ import tj.earth.worldgen.Underground;
 @Mixin(WorldGenerationContext.class)
 abstract class WorldGenerationContextMixin implements Underground.VanillaHeights {
     @Unique
-    private boolean earth$vanilla;
+    private boolean earth$vanilla, earth$earth;
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void earth$whose(final ChunkGenerator generator, final LevelHeightAccessor heights, final CallbackInfo callback) {
+        this.earth$earth = Earth.is(generator);
+    }
+
+    @Override
+    public boolean earth$isEarth() {
+        return this.earth$earth;
+    }
 
     @Override
     public void earth$vanillaHeights(final boolean on) {

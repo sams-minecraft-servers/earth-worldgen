@@ -1,5 +1,6 @@
 package tj.earth.worldgen.mixin;
 
+import tj.earth.worldgen.Earth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -26,7 +27,7 @@ abstract class RuinedPortalStructureMixin {
     private static int earth$buriedY(final RandomSource random, final int lowest, final int highest,
                                      final RandomSource sameRandom, final ChunkGenerator generator, final RuinedPortalPiece.VerticalPlacement placement, final boolean airPocket,
                                      final int surfaceY, final int ySpan, final BoundingBox box, final LevelHeightAccessor heights, final RandomState randomState) {
-        boolean earth = heights.getHeight() == DimensionType.Y_SIZE;
+        boolean earth = Earth.is(generator);
         return getRandomWithinInterval(random, earth ? Math.max(lowest, highest - Underground.DEPTH) : lowest, highest);
     }
 }

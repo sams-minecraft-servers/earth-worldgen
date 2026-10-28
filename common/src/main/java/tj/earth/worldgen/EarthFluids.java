@@ -18,7 +18,7 @@ public final class EarthFluids {
 
     /** Our dimension is the one that uses the full height the game allows. */
     public static boolean isEarth(final NoiseGeneratorSettings settings) {
-        return settings.noiseSettings().height() == DimensionType.Y_SIZE;
+        return Earth.is(settings);
     }
 
     public static Aquifer.FluidPicker picker(final NoiseGeneratorSettings settings) {

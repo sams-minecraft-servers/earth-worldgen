@@ -1,5 +1,6 @@
 package tj.earth.worldgen.mixin;
 
+import tj.earth.worldgen.Earth;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.entity.MobCategory;
@@ -33,7 +34,7 @@ import tj.earth.worldgen.UrbanBuilder;
 abstract class ChunkGeneratorMixin {
     @Inject(method = "applyBiomeDecoration", at = @At("HEAD"))
     private void earth$streets(final WorldGenLevel level, final ChunkAccess chunk, final StructureManager structureManager, final CallbackInfo callback) {
-        if (chunk.getHeight() != DimensionType.Y_SIZE) return;
+        if (!Earth.is((ChunkGenerator) (Object) this)) return;
         UrbanBuilder.build(chunk);
         Monuments.build(chunk);
     }
@@ -41,7 +42,7 @@ abstract class ChunkGeneratorMixin {
     /** A new Earth world's spawn: the place in newWorldSpawn (the game searches round it for a safe spot). */
     @Inject(method = "getOrigin", at = @At("HEAD"), cancellable = true)
     private void earth$spawn(final RandomState randomState, final CallbackInfoReturnable<ChunkPos> callback) {
-        if (!(((ChunkGenerator) (Object) this).getBiomeSource() instanceof EarthBiomeSource)) return;
+        if (!Earth.is((ChunkGenerator) (Object) this)) return;
         EarthConfig c = EarthConfig.get();
         double perDegree = c.blocksPerDegree();
         int x = (int) Math.round(c.newWorldSpawn.longitude * perDegree), z = (int) Math.round(-c.newWorldSpawn.latitude * perDegree);
@@ -51,6 +52,6 @@ abstract class ChunkGeneratorMixin {
     @Inject(method = "getMobsAt", at = @At("RETURN"), cancellable = true)
     private void earth$fauna(final Level level, final StructureManager structureManager, final MobCategory category, final BlockPos pos,
                              final CallbackInfoReturnable<WeightedList<MobSpawnSettings.SpawnerData>> callback) {
-        if (level.getHeight() == DimensionType.Y_SIZE) callback.setReturnValue(Fauna.adjust(callback.getReturnValue(), category, pos.getX(), pos.getZ()));
+        if (Earth.is((ChunkGenerator) (Object) this)) callback.setReturnValue(Fauna.adjust(callback.getReturnValue(), category, pos.getX(), pos.getZ()));
     }
 }

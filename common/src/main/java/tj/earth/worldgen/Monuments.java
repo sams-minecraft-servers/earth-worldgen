@@ -90,7 +90,7 @@ public final class Monuments {
      */
     public static void settle(final WorldGenRegion region) {
         EarthConfig.MonumentSettings settings = EarthConfig.get().monuments;
-        if (!settings.enabled || region.getHeight() != net.minecraft.world.level.dimension.DimensionType.Y_SIZE) return;
+        if (!settings.enabled || !Earth.is(region.getLevel())) return;
         ChunkPos at = region.getCenter();
         List<Monument> here = index().get(at.pack());
         if (here == null) return;
@@ -107,7 +107,9 @@ public final class Monuments {
                 if (entity == null) continue;
                 entity.snapTo(x + 0.5, y, z + 0.5, 0f, 0f);
                 if (entity instanceof Mob mob) {
-                    mob.finalizeSpawn(region, region.getCurrentDifficultyAt(BlockPos.containing(x, y, z)), EntitySpawnReason.STRUCTURE, null);
+                    synchronized (Earth.CREATURES) {
+                        mob.finalizeSpawn(region, region.getCurrentDifficultyAt(BlockPos.containing(x, y, z)), EntitySpawnReason.STRUCTURE, null);
+                    }
                     mob.setPersistenceRequired();
                 }
                 region.addFreshEntityWithPassengers(entity);

@@ -23,6 +23,8 @@ public final class Underground {
 
     /** A WorldGenerationContext that can be made to answer as the ordinary world would (see WorldGenerationContextMixin). */
     public interface VanillaHeights {
+        boolean earth$isEarth();
+
         void earth$vanillaHeights(boolean on);
     }
 
@@ -32,7 +34,7 @@ public final class Underground {
     private Underground() {}
 
     public static boolean isEarth(final WorldGenerationContext context) {
-        return context.getGenDepth() == DimensionType.Y_SIZE;
+        return ((VanillaHeights) context).earth$isEarth();
     }
 
     /** The Y of the first block above the ground (under water: above the bed). */

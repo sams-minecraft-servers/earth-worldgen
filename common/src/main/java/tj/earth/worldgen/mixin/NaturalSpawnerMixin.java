@@ -1,5 +1,6 @@
 package tj.earth.worldgen.mixin;
 
+import tj.earth.worldgen.Earth;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.random.WeightedList;
@@ -21,6 +22,6 @@ abstract class NaturalSpawnerMixin {
     private static WeightedList<MobSpawnSettings.SpawnerData> earth$fauna(final MobSpawnSettings settings, final MobCategory category,
                                                                          final ServerLevelAccessor level, final BlockPos sourcePos, final ChunkPos chunk, final RandomSource random) {
         WeightedList<MobSpawnSettings.SpawnerData> mobs = settings.getMobsToSpawn(category);
-        return level.getHeight() == DimensionType.Y_SIZE ? Fauna.adjust(mobs, category, chunk.getMiddleBlockX(), chunk.getMiddleBlockZ()) : mobs;
+        return Earth.is(level.getLevel()) ? Fauna.adjust(mobs, category, chunk.getMiddleBlockX(), chunk.getMiddleBlockZ()) : mobs;
     }
 }

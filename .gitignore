@@ -6,3 +6,4 @@ run/
 __pycache__/
 run-dnd/
 run-neoforge/
+run-compat-*/
