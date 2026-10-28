@@ -40,7 +40,7 @@ without it, delete the world folder and start again.
 
 ### 3. Write the config
 
-The mod writes `config/earth_worldgen.json`, with every setting and its default, the first time the
+The mod writes `config/earth-mod/earth_worldgen.json`, with every setting and its default, the first time the
 server starts. To set it up before the world exists, copy `config.example.json` there instead.
 
 Edit the three folder paths so they point at your data. Relative paths are read from the server's

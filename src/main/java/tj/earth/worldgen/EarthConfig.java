@@ -1,23 +1,12 @@
 package tj.earth.worldgen;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
- * How the real Earth is laid onto the world. Read once from config/earth_worldgen.json in the
- * server's folder; a missing file or field means the default below. The file is written with every
- * setting and its default on the first start, and settings added by a newer version of the mod are
- * added to it (with their defaults) on the next start; nothing already in it is changed.
+ * How the real Earth is laid onto the world. Read once from config/earth-mod/earth_worldgen.json in the
+ * server's folder (see ConfigFile); a missing field means the default below.
  *
  * Changing any of these after a world has been explored leaves a seam between old and new chunks.
  */
@@ -119,48 +108,11 @@ public final class EarthConfig {
 
     private static synchronized EarthConfig load() {
         if (instance == null) {
-            Path file = Path.of("config", "earth_worldgen.json");
-            Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-            JsonObject defaults = gson.toJsonTree(new EarthConfig()).getAsJsonObject();
-            JsonObject json = new JsonObject();
-            if (Files.exists(file)) {
-                try (Reader in = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-                    JsonElement read = JsonParser.parseReader(in);
-                    if (read.isJsonObject()) json = read.getAsJsonObject();
-                } catch (Exception e) {
-                    throw new IllegalStateException("config/earth_worldgen.json could not be read: " + e.getMessage(), e);
-                }
-            }
-            if (addMissing(json, defaults) || !Files.exists(file)) {
-                try {
-                    Files.createDirectories(file.getParent());
-                    Path part = file.resolveSibling("earth_worldgen.json.part");
-                    Files.writeString(part, gson.toJson(json) + "\n", StandardCharsets.UTF_8);
-                    Files.move(part, file, java.nio.file.StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
-                } catch (Exception e) {
-                    EarthWorldgen.LOG.warn("Earth: could not write {} ({}); using the settings as read", file, e.getMessage());
-                }
-            }
-            instance = gson.fromJson(json, EarthConfig.class);
+            instance = ConfigFile.read("earth_worldgen.json", EarthConfig.class, new EarthConfig(), Path.of("config", "earth_worldgen.json"));
             EarthWorldgen.LOG.info("Earth: 1:{} map, {} m of height per block, elevation from {}",
                 (long) instance.horizontalScale, instance.metresPerBlockY, Path.of(instance.dataDir).toAbsolutePath());
         }
         return instance;
-    }
-
-    /** Adds every default the file does not have yet, at any depth. True if anything was added. */
-    private static boolean addMissing(final JsonObject json, final JsonObject defaults) {
-        boolean added = false;
-        for (Map.Entry<String, JsonElement> entry : defaults.entrySet()) {
-            JsonElement have = json.get(entry.getKey());
-            if (have == null) {
-                json.add(entry.getKey(), entry.getValue().deepCopy());
-                added = true;
-            } else if (have.isJsonObject() && entry.getValue().isJsonObject()) {
-                added |= addMissing(have.getAsJsonObject(), entry.getValue().getAsJsonObject());
-            }
-        }
-        return added;
     }
 
     /** Blocks in one degree of longitude, and (the map is a plain grid) of latitude. */

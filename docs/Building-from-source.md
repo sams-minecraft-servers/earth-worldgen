@@ -49,4 +49,4 @@ places doesn't use up the machine's memory.
 | `src/main/java/tj/earth/worldgen/mixin/` | Where it hooks into the game's world generation |
 | `datapack/` | Dimension, noise settings and structure changes that go in the world |
 | `tools/` | Data download and packing, test server, inspection tools |
-| `config.example.json` | Starting point for `config/earth_worldgen.json` |
+| `config.example.json` | Starting point for `config/earth-mod/earth_worldgen.json` |

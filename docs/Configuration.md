@@ -1,6 +1,8 @@
 # Configuration
 
-The mod's settings are in `config/earth_worldgen.json` in the server's folder. The mod writes this
+The mod's settings are in `config/earth-mod/earth_worldgen.json` in the server's folder (the radio
+has its own file, `config/earth-mod/radio.json`: see [Radio](Radio.md)). A config from version 0.1
+at `config/earth_worldgen.json` is moved there automatically. The mod writes this
 file with every setting and its default the first time the server starts. After an update, settings
 added in the new version are added to the file with their defaults; nothing you changed is touched.
 The file is read once, at start-up, so restart the server after editing it.

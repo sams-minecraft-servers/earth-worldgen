@@ -26,7 +26,8 @@ mkdir -p "$RUN/mods" "$RUN/config" "$RUN/world/datapacks"
 find "$RUN/mods" -name 'earth-worldgen-*.jar' -delete
 cp build/libs/earth-worldgen-*.jar "$RUN/mods/"
 rm -rf "$RUN/world/datapacks/earth" && cp -r datapack "$RUN/world/datapacks/earth"
-[ -f "$RUN/config/earth_worldgen.json" ] || cp config.example.json "$RUN/config/earth_worldgen.json"
+mkdir -p "$RUN/config/earth-mod"
+[ -f "$RUN/config/earth-mod/earth_worldgen.json" ] || [ -f "$RUN/config/earth_worldgen.json" ] || cp config.example.json "$RUN/config/earth-mod/earth_worldgen.json"
 echo "eula=true" > "$RUN/eula.txt"
 [ -f "$RUN/server.properties" ] || cat > "$RUN/server.properties" <<'PROPS'
 server-ip=127.0.0.1

@@ -30,6 +30,8 @@ ordinary, unmodified game.
   sea bed and many more, built where they really stand as the land under them is generated.
 - **Optional real streets and buildings.** Building outlines and roads from Overture Maps can be
   built into chunks as they are made. At 1:5 a house is a block or two across.
+- **Country radio (optional).** One station per country, found by visiting it, heard clearly inside
+  its borders and fading into static beyond them. You supply the audio; the mod ships none.
 - **Everything can be switched.** Cities, buildings, roads, city villagers, each monument, each of
   the game's structures and the real animal ranges can be turned off in the config, and cities and
   monuments can be turned off country by country.
@@ -42,7 +44,8 @@ You need a Fabric server for Minecraft **26.3**, Java **25**, and disk space for
 
 1. Put the mod jar in the server's `mods/` folder. Fabric API is not needed.
 2. **Before the world is first started**, copy `datapack/` into `<world>/datapacks/earth_worldgen/`.
-3. Start the server once to write `config/earth_worldgen.json`, then point it at your data folders.
+3. Start the server once to write the settings (`config/earth-mod/earth_worldgen.json` and
+   `config/earth-mod/radio.json`), then point them at your data folders.
 4. Download and pack the data (`tools/download_data.py`, then `tools/PackElevation.java`).
 5. Start the server, and set a spawn point on land (block 0, 0 is open sea off West Africa).
 
@@ -56,6 +59,7 @@ The full walk-through is in [docs/Installing-on-a-server.md](docs/Installing-on-
 | [Getting the data](docs/Getting-the-data.md) | Downloading and packing elevation, land cover and streets |
 | [Configuration](docs/Configuration.md) | Every setting in `earth_worldgen.json` |
 | [Monuments](docs/Monuments.md) | The monuments and their ids |
+| [Radio](docs/Radio.md) | Country radio: setting it up and its settings |
 | [Finding places](docs/Finding-places.md) | Converting latitude and longitude to block coordinates |
 | [How it works](docs/How-it-works.md) | What each part of the mod does to world generation |
 | [Building from source](docs/Building-from-source.md) | Compiling the mod and running the test server |
