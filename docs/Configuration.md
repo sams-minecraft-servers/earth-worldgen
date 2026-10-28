@@ -44,6 +44,20 @@ The file is read once, at start-up, so restart the server after editing it.
 > buildings or a monument off does not remove what is already built, and changing the scale,
 > heights or sea level after players have explored leaves visible seams between old and new land.
 
+## New worlds and downloads
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `installDatapack` | `true` | When the world does not exist yet, put the mod's datapack in its datapacks folder. |
+| `newWorldSpawn.latitude`, `.longitude` | `-1.2864`, `36.8172` | Where a new world's spawn goes (Nairobi). |
+| `download.elevation` | `true` | Download each elevation tile (5 to 25 MB) the first time land over it is made. |
+| `download.landCover` | `true` | Download each land cover tile (tens to hundreds of MB, 3 × 3 degrees) the first time it is needed. |
+| `download.atOnce` | `2` | How many tiles may download at once. |
+| `download.maxMegabytesPerSecond` | `0` | A speed limit for each download, in MB/s (0: none). Worth setting if other servers share the disk. |
+
+If a download fails three times, the land made meanwhile is made as if the tile were missing
+(open sea, or biomes by height alone) and stays that way; the next new chunk there tries again.
+
 ## Data folders
 
 Relative paths are read from the server's folder.

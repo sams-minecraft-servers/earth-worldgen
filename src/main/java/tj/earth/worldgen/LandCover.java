@@ -87,6 +87,7 @@ public final class LandCover {
     private static Sheet open(int south, int west) {
         String name = String.format("ESA_WorldCover_10m_2021_v200_%c%02d%c%03d_Map.tif", south < 0 ? 'S' : 'N', Math.abs(south), west < 0 ? 'W' : 'E', Math.abs(west));
         Path file = Path.of(EarthConfig.get().landCoverDir, name);
+        Downloads.landCover(file, name);
         if (!Files.exists(file)) return MISSING;
         try {
             FileChannel channel = FileChannel.open(file, StandardOpenOption.READ);

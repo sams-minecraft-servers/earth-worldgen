@@ -42,17 +42,17 @@ any real place, or a latitude and longitude, into the block to go to.
 
 ## Quick start
 
-You need a Fabric server for Minecraft **26.3**, Java **25**, and disk space for the data: about
-250 GB for the whole planet, or much less for one region.
+1. Install a Fabric server for Minecraft **26.3** (Java **25**).
+2. Drop the [mod jar](https://github.com/sams-minecraft-servers/earth-worldgen/releases/tag/latest) into `mods/`.
+3. Start the server. That's it.
 
-1. Put the mod jar in the server's `mods/` folder. Fabric API is not needed.
-2. **Before the world is first started**, copy `datapack/` into `<world>/datapacks/earth_worldgen/`.
-3. Start the server once to write the settings (`config/earth-mod/earth_worldgen.json` and
-   `config/earth-mod/radio.json`), then point them at your data folders.
-4. Download and pack the data (`tools/download_data.py`, then `tools/PackElevation.java`).
-5. Start the server, and set a spawn point on land (block 0, 0 is open sea off West Africa).
+On the first start the mod sets up a **new** world as the Earth: it installs its own datapack,
+puts the spawn on land (Nairobi, unless you choose somewhere else), and downloads the map data for
+each area the first time anyone goes there. Settings are written to `config/earth-mod/`.
 
-The full walk-through is in [docs/Installing-on-a-server.md](docs/Installing-on-a-server.md).
+A world that already exists is never changed: delete it (or set a new `level-name`) to start an
+Earth world. For a busy server, downloading the data in advance makes exploring smoother; see
+[Getting the data](docs/Getting-the-data.md).
 
 ## Documentation
 

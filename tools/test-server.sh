@@ -13,7 +13,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 COMMANDS=${1:?usage: tools/test-server.sh commands.txt [--fresh]}
-RUN=run
+RUN=${TEST_RUN:-run}
 ROOT=$PWD
 HEAP=${TEST_HEAP:-4G}
 LIMIT=$(( $(numfmt --from=iec "$HEAP") / 1048576 + 2048 ))M
@@ -25,9 +25,12 @@ if [ "${2:-}" = "--fresh" ]; then find "$RUN/world" -mindepth 1 -maxdepth 1 ! -n
 mkdir -p "$RUN/mods" "$RUN/config" "$RUN/world/datapacks"
 find "$RUN/mods" -name 'earth-worldgen-*.jar' -delete
 cp build/libs/earth-worldgen-*.jar "$RUN/mods/"
+# TEST_JAR_ONLY=1: nothing but the jar, as someone dropping it into mods/ would have (the mod installs its own datapack)
+if [ -z "${TEST_JAR_ONLY:-}" ]; then
 rm -rf "$RUN/world/datapacks/earth" && cp -r datapack "$RUN/world/datapacks/earth"
 mkdir -p "$RUN/config/earth-mod"
 [ -f "$RUN/config/earth-mod/earth_worldgen.json" ] || [ -f "$RUN/config/earth_worldgen.json" ] || cp config.example.json "$RUN/config/earth-mod/earth_worldgen.json"
+fi
 echo "eula=true" > "$RUN/eula.txt"
 [ -f "$RUN/server.properties" ] || cat > "$RUN/server.properties" <<'PROPS'
 server-ip=127.0.0.1

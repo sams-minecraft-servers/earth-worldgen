@@ -4,3 +4,4 @@ run/
 *.iml
 .idea/
 __pycache__/
+run-dnd/

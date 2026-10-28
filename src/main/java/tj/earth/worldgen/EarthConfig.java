@@ -35,6 +35,38 @@ public final class EarthConfig {
     /** Villagers put in each chunk of built-up land as it is first made (see CityVillagers); 0 for none. */
     public float villagersPerCityChunk = 0.25f;
 
+    /**
+     * When a new world is made, put the mod's datapack in its datapacks folder (needed before the
+     * world's first start). Nothing is done for a world that already exists.
+     */
+    public boolean installDatapack = true;
+    /** Where players first appear in a new world (the world's spawn), as latitude and longitude. Default: Nairobi. */
+    public Place newWorldSpawn = new Place(-1.2864, 36.8172);
+    /** Fetching the map data for each area the first time it is needed (see Downloads). */
+    public Download download = new Download();
+
+    public static final class Place {
+        public double latitude, longitude;
+
+        public Place() {}
+
+        public Place(final double latitude, final double longitude) {
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+    }
+
+    public static final class Download {
+        /** Download each one-degree elevation tile (about 5 to 25 MB) the first time land over it is made. */
+        public boolean elevation = true;
+        /** Download each three-degree land cover tile (ESA WorldCover, tens to hundreds of MB) the first time it is needed. */
+        public boolean landCover = true;
+        /** How many tiles may download at once. */
+        public int atOnce = 2;
+        /** The most each download may take from the line, in MB per second; 0 for no limit. Worth setting on a machine whose disk other servers share. */
+        public double maxMegabytesPerSecond = 0;
+    }
+
     /** The real towns and cities: their streets and buildings (see UrbanBuilder) and their people (see CityVillagers). */
     public Cities cities = new Cities();
     /** Famous buildings and wrecks, built where they really stand (see Monuments). */

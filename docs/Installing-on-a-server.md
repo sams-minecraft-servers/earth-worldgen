@@ -15,6 +15,12 @@ has to be there before the world's first start, and chunks that already exist ar
   noticeably smoother than spinning disks.
 - Python 3 and `curl` for the download scripts.
 
+## The short way
+
+Drop the jar into `mods/` of a Fabric server whose world does not exist yet, and start it. The mod
+installs its datapack into the new world, puts the spawn on land and downloads map data as players
+explore. The rest of this page is for setting things up by hand, or in advance.
+
 ## Steps
 
 ### 1. Install the mod
@@ -23,6 +29,8 @@ Build the jar (see [Building from source](Building-from-source.md)) or take one 
 repository's releases, and put it in the server's `mods/` folder.
 
 ### 2. Add the datapack before the first start
+
+The mod does this by itself when the world does not exist yet (`installDatapack`). By hand:
 
 The datapack makes the overworld 4,064 blocks tall (Y −2032 to 2031, the most the game allows) and
 points its generator at the mod. It also switches off the game's own villages and spreads
@@ -49,13 +57,13 @@ in [Configuration](Configuration.md)): **settings only affect land generated aft
 
 ### 4. Get the data
 
-Follow [Getting the data](Getting-the-data.md). At minimum you need packed elevation tiles for the
-area players will visit. Anywhere a tile is missing is generated as open sea.
+By default the mod downloads each area's data the first time a player goes there. To download it in
+advance instead, follow [Getting the data](Getting-the-data.md).
 
 ### 5. Start the server and set a spawn
 
-Start the server once. Block 0, 0 is where the equator meets the prime meridian, in open sea in
-the Gulf of Guinea, so pick a place on land and set the spawn there. For example, Nairobi:
+A new world's spawn is put at `newWorldSpawn` (Nairobi by default). To move it later, use
+`/setworldspawn`, for example:
 
 ```
 /setworldspawn 819694 1700 28640

@@ -7,7 +7,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +17,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import tj.earth.worldgen.EarthBiomeSource;
+import tj.earth.worldgen.EarthConfig;
 import tj.earth.worldgen.Fauna;
 import tj.earth.worldgen.Monuments;
 import tj.earth.worldgen.UrbanBuilder;
@@ -32,6 +36,16 @@ abstract class ChunkGeneratorMixin {
         if (chunk.getHeight() != DimensionType.Y_SIZE) return;
         UrbanBuilder.build(chunk);
         Monuments.build(chunk);
+    }
+
+    /** A new Earth world's spawn: the place in newWorldSpawn (the game searches round it for a safe spot). */
+    @Inject(method = "getOrigin", at = @At("HEAD"), cancellable = true)
+    private void earth$spawn(final RandomState randomState, final CallbackInfoReturnable<ChunkPos> callback) {
+        if (!(((ChunkGenerator) (Object) this).getBiomeSource() instanceof EarthBiomeSource)) return;
+        EarthConfig c = EarthConfig.get();
+        double perDegree = c.blocksPerDegree();
+        int x = (int) Math.round(c.newWorldSpawn.longitude * perDegree), z = (int) Math.round(-c.newWorldSpawn.latitude * perDegree);
+        callback.setReturnValue(new ChunkPos(x >> 4, z >> 4));
     }
 
     @Inject(method = "getMobsAt", at = @At("RETURN"), cancellable = true)

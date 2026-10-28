@@ -126,6 +126,7 @@ public final class Elevation {
         Tile tile = MISSING;
         String name = name(south, west);
         Path file = Path.of(EarthConfig.get().dataDir, name.substring(0, 3), name + ".ehg");
+        Downloads.elevation(file, name);
         if (Files.exists(file)) {
             try (FileChannel channel = FileChannel.open(file, StandardOpenOption.READ)) {
                 ByteBuffer packed = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());

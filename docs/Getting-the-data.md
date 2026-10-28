@@ -1,5 +1,11 @@
 # Getting the data
 
+**You may not need this page.** By default the mod downloads elevation and land cover for each
+area the first time land there is made (settings under `download` in
+[Configuration](Configuration.md)). The first visit to a new area then waits for its tiles: a few
+seconds for elevation, up to a minute for a land cover tile. Downloading in advance, as below, avoids
+that, and is the way to get streets and buildings.
+
 The mod reads three kinds of data from disk. None of it is included in this repository; the
 scripts in `tools/` fetch it from public sources and pack it into the form the mod reads. Every
 script can be stopped and started again: finished files are skipped.
