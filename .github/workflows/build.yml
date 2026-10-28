@@ -23,15 +23,15 @@ jobs:
           java-version: '25'
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew build --no-daemon
-      - name: Pick the jar
-        id: jar
+      - name: Collect the jars (one per loader)
         run: |
-          jar=$(ls build/libs/*.jar | grep -v -e '-sources' -e '-dev' | head -1)
-          echo "path=$jar" >> "$GITHUB_OUTPUT"
+          mkdir -p jars
+          for j in */build/libs/*.jar; do case "$j" in *-sources*|*-dev*) ;; *) cp "$j" jars/ ;; esac; done
+          ls -la jars
       - uses: actions/upload-artifact@v4
         with:
-          name: jar
-          path: ${{ steps.jar.outputs.path }}
+          name: jars
+          path: jars/*.jar
 
       - name: Update the "latest" release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -44,10 +44,10 @@ jobs:
               --notes "Built automatically from the newest commit on main. For a tested version, use the newest numbered release if there is one."
           fi
           for old in $(gh release view latest --json assets --jq '.assets[].name'); do gh release delete-asset latest "$old" -y; done
-          gh release upload latest "${{ steps.jar.outputs.path }}" --clobber
+          gh release upload latest jars/*.jar --clobber
 
       - name: Make a numbered release
         if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" "${{ steps.jar.outputs.path }}" --title "${GITHUB_REF_NAME}" --generate-notes
+        run: gh release create "${GITHUB_REF_NAME}" jars/*.jar --title "${GITHUB_REF_NAME}" --generate-notes

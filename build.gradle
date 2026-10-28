@@ -1,31 +1,28 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+    id 'net.fabricmc.fabric-loom' version "${loom_version}" apply false
+    id 'net.neoforged.moddev' version "${moddev_version}" apply false
 }
 
-version = "${project.mod_version}+${project.minecraft_version}"
-group = 'tj.earth'
-base { archivesName = 'earth-worldgen' }
+subprojects {
+    apply plugin: 'java'
+    version = "${rootProject.mod_version}+${rootProject.minecraft_version}"
+    group = 'tj.earth'
 
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    implementation "net.fabricmc:fabric-loader:${project.loader_version}"
-}
+    // The shared code and resources, and the datapack (inside the jar, so the mod can install it into a new world).
+    sourceSets.main.java.srcDir rootProject.file('common/src/main/java')
+    sourceSets.main.resources.srcDir rootProject.file('common/src/main/resources')
+    def datapackZip = tasks.register('datapackZip', Zip) {
+        from rootProject.file('datapack')
+        archiveFileName = 'datapack.zip'
+        destinationDirectory = layout.buildDirectory.dir('generated/datapack/earth_worldgen')
+    }
+    processResources {
+        dependsOn datapackZip
+        from(layout.buildDirectory.dir('generated/datapack'))
+        inputs.property 'version', project.version
+        filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml']) { expand 'version': inputs.properties.version }
+    }
 
-// The datapack goes inside the jar too, so the mod can install it into a new world by itself.
-def datapackZip = tasks.register('datapackZip', Zip) {
-    from 'datapack'
-    archiveFileName = 'datapack.zip'
-    destinationDirectory = layout.buildDirectory.dir('generated/datapack/earth_worldgen')
+    java { toolchain { languageVersion = JavaLanguageVersion.of(25) } }
+    tasks.withType(JavaCompile).configureEach { it.options.release = 25 }
 }
-
-processResources {
-    dependsOn datapackZip
-    from(layout.buildDirectory.dir('generated/datapack'))
-    inputs.property 'version', project.version
-    filesMatching('fabric.mod.json') { expand 'version': inputs.properties.version }
-}
-
-java {
-    toolchain { languageVersion = JavaLanguageVersion.of(25) }
-}
-tasks.withType(JavaCompile).configureEach { it.options.release = 25 }

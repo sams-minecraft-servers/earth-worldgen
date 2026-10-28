@@ -42,8 +42,9 @@ any real place, or a latitude and longitude, into the block to go to.
 
 ## Quick start
 
-1. Install a Fabric server for Minecraft **26.3** (Java **25**).
-2. Drop the [mod jar](https://github.com/sams-minecraft-servers/earth-worldgen/releases/tag/latest) into `mods/`.
+1. Install a **Fabric** or **NeoForge** server for Minecraft **26.3** (Java **25**).
+2. Drop the matching [mod jar](https://github.com/sams-minecraft-servers/earth-worldgen/releases/tag/latest)
+   (`earth-worldgen-fabric-…` or `earth-worldgen-neoforge-…`) into `mods/`.
 3. Start the server. That's it.
 
 On the first start the mod sets up a **new** world as the Earth: it installs its own datapack,

@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "tj.earth.worldgen.fabric.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "mixins": [
+    "BuiltInRegistriesMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

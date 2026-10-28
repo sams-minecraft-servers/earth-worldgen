@@ -1,0 +1,8 @@
+apply plugin: 'net.neoforged.moddev'
+
+base { archivesName = 'earth-worldgen-neoforge' }
+
+neoForge {
+    version = rootProject.neoforge_version
+    mods { earth_worldgen { sourceSet sourceSets.main } }
+}

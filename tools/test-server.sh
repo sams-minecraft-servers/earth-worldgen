@@ -18,13 +18,13 @@ ROOT=$PWD
 HEAP=${TEST_HEAP:-4G}
 LIMIT=$(( $(numfmt --from=iec "$HEAP") / 1048576 + 2048 ))M
 # Only this user's: a live server run by root may also be a Fabric server, and is not ours to stop.
-if pgrep -u "$(id -u)" -f "[f]abric-server.jar --nogui" > /dev/null; then echo "a test server is already running; stop it first"; exit 1; fi
-[ -s "$RUN/fabric-server.jar" ] || { echo "run/fabric-server.jar is missing (see README)"; exit 1; }
+if pgrep -u "$(id -u)" -f "[f]abric-server.jar --nogui|[u]nix_args.txt --nogui" > /dev/null; then echo "a test server is already running; stop it first"; exit 1; fi
+[ -s "$RUN/fabric-server.jar" ] || [ -s "$RUN/run.sh" ] || { echo "$RUN has no server (fabric-server.jar, or a NeoForge run.sh)"; exit 1; }
 if [ "${2:-}" = "--fresh" ]; then find "$RUN/world" -mindepth 1 -maxdepth 1 ! -name datapacks -exec rm -r {} +; fi
 
 mkdir -p "$RUN/mods" "$RUN/config" "$RUN/world/datapacks"
 find "$RUN/mods" -name 'earth-worldgen-*.jar' -delete
-cp build/libs/earth-worldgen-*.jar "$RUN/mods/"
+cp ${TEST_LOADER:-fabric}/build/libs/earth-worldgen-*.jar "$RUN/mods/"
 # TEST_JAR_ONLY=1: nothing but the jar, as someone dropping it into mods/ would have (the mod installs its own datapack)
 if [ -z "${TEST_JAR_ONLY:-}" ]; then
 rm -rf "$RUN/world/datapacks/earth" && cp -r datapack "$RUN/world/datapacks/earth"
@@ -48,7 +48,9 @@ PROPS
 
 FIFO=$(mktemp -u) && mkfifo "$FIFO"
 trap 'rm -f "$FIFO"' EXIT
-( cd "$RUN" && GUARD_TIMEOUT=${TEST_TIMEOUT:-30m} exec "$ROOT/tools/guard.sh" "$LIMIT" java -Xmx$HEAP -Xms1G ${TEST_JAVA_OPTS:-} -jar fabric-server.jar --nogui < "$FIFO" > server.out 2>&1 ) &
+# Fabric: fabric-server.jar. NeoForge: the argument file its installer writes (what its run.sh uses).
+if [ -s "$RUN/fabric-server.jar" ]; then LAUNCH="-jar fabric-server.jar"; else LAUNCH="@$(cd "$RUN" && ls libraries/net/neoforged/neoforge/*/unix_args.txt | head -1)"; fi
+( cd "$RUN" && GUARD_TIMEOUT=${TEST_TIMEOUT:-30m} exec "$ROOT/tools/guard.sh" "$LIMIT" java -Xmx$HEAP -Xms1G ${TEST_JAVA_OPTS:-} $LAUNCH --nogui < "$FIFO" > server.out 2>&1 ) &
 SERVER=$!
 exec 3> "$FIFO"
 for i in $(seq 1 180); do

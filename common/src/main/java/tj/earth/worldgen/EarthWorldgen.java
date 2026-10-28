@@ -8,16 +8,13 @@ import java.nio.file.Path;
 import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class EarthWorldgen implements ModInitializer {
+public final class EarthWorldgen {
     public static final String ID = "earth_worldgen";
     public static final Logger LOG = LoggerFactory.getLogger("EarthWorldgen");
 
@@ -33,10 +30,21 @@ public final class EarthWorldgen implements ModInitializer {
         Registry.register(BuiltInRegistries.BIOME_SOURCE, Identifier.fromNamespaceAndPath(ID, "earth"), EarthBiomeSource.CODEC);
     }
 
-    @Override
-    public void onInitialize() {
-        if (!registered) throw new IllegalStateException("Earth worldgen was not registered: BuiltInRegistriesMixin did not run");
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) installDatapack();
+    /** Called by the loader's entry point (Fabric or NeoForge) once mods are being started. */
+    public static void start(final boolean dedicatedServer) {
+        if (dedicatedServer) installDatapack();
+    }
+
+    /** The mod's own entries, for loaders that register through an event (NeoForge). */
+    public static void eachEntry(final EntryConsumer consumer) {
+        consumer.accept(BuiltInRegistries.DENSITY_FUNCTION_TYPE.key(), Identifier.fromNamespaceAndPath(ID, "surface"), ElevationFunction.CODEC);
+        consumer.accept(BuiltInRegistries.DENSITY_FUNCTION_TYPE.key(), Identifier.fromNamespaceAndPath(ID, "below_ground"), BelowGround.CODEC);
+        consumer.accept(BuiltInRegistries.MATERIAL_RULE_TYPE.key(), Identifier.fromNamespaceAndPath(ID, "ground"), GroundRule.CODEC);
+        consumer.accept(BuiltInRegistries.BIOME_SOURCE.key(), Identifier.fromNamespaceAndPath(ID, "earth"), EarthBiomeSource.CODEC);
+    }
+
+    public interface EntryConsumer {
+        void accept(net.minecraft.resources.ResourceKey<? extends Registry<?>> registry, Identifier id, Object value);
     }
 
     /**

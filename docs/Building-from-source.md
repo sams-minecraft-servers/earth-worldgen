@@ -6,7 +6,9 @@ You need Java 25. The Gradle wrapper downloads everything else, including Minecr
 ./gradlew build
 ```
 
-The jar is written to `build/libs/earth-worldgen-<version>+<minecraft version>.jar`. A build takes a
+This builds one jar per loader: `fabric/build/libs/earth-worldgen-fabric-<version>+<minecraft>.jar`
+and `neoforge/build/libs/earth-worldgen-neoforge-<version>+<minecraft>.jar`. The mod's code is shared,
+in `common/`; `fabric/` and `neoforge/` only hold each loader's entry point and mod information. A build takes a
 few GB of memory. On a machine that also runs servers, run it under a hard memory limit:
 
 ```
@@ -45,8 +47,9 @@ places doesn't use up the machine's memory.
 
 | Path | What it is |
 |---|---|
-| `src/main/java/tj/earth/worldgen/` | The mod (see [How it works](How-it-works.md)) |
-| `src/main/java/tj/earth/worldgen/mixin/` | Where it hooks into the game's world generation |
+| `common/src/main/java/tj/earth/worldgen/` | The mod, shared by every loader (see [How it works](How-it-works.md)) |
+| `common/src/main/java/tj/earth/worldgen/mixin/` | Where it hooks into the game's world generation |
+| `fabric/`, `neoforge/` | Each loader's entry point and mod information |
 | `datapack/` | Dimension, noise settings and structure changes that go in the world |
 | `tools/` | Data download and packing, test server, inspection tools |
 | `config.example.json` | Starting point for `config/earth-mod/earth_worldgen.json` |

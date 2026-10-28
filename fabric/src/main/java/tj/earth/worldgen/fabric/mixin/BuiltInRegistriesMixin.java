@@ -1,4 +1,4 @@
-package tj.earth.worldgen.mixin;
+package tj.earth.worldgen.fabric.mixin;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.spongepowered.asm.mixin.Mixin;

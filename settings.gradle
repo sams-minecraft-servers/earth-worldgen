@@ -1,8 +1,11 @@
 pluginManagement {
     repositories {
         maven { name = 'Fabric'; url = 'https://maven.fabricmc.net/' }
+        maven { name = 'NeoForged'; url = 'https://maven.neoforged.net/releases' }
         mavenCentral()
         gradlePluginPortal()
     }
 }
 rootProject.name = 'earth-worldgen'
+// The mod's code is in common/ and is built once per loader, each with its own small entry point.
+include 'fabric', 'neoforge'

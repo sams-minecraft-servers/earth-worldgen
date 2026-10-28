@@ -16,11 +16,12 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "tj.earth.worldgen.EarthWorldgen"
+      "tj.earth.worldgen.fabric.FabricEntry"
     ]
   },
   "mixins": [
-    "earth_worldgen.mixins.json"
+    "earth_worldgen.mixins.json",
+    "earth_worldgen.fabric.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.19.0",

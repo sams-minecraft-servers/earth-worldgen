@@ -1,0 +1,8 @@
+apply plugin: 'net.fabricmc.fabric-loom'
+
+base { archivesName = 'earth-worldgen-fabric' }
+
+dependencies {
+    minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${rootProject.loader_version}"
+}

@@ -5,8 +5,8 @@ has to be there before the world's first start, and chunks that already exist ar
 
 ## What you need
 
-- A Fabric server for Minecraft **26.3** with Fabric Loader **0.19.0 or newer**
-  (https://fabricmc.net/use/server/). Fabric API is not needed.
+- A server for Minecraft **26.3**: **Fabric** (Loader 0.19.0 or newer, https://fabricmc.net/use/server/;
+  Fabric API is not needed) or **NeoForge** (26.3, https://neoforged.net). Use the jar for your loader.
 - Java **25**.
 - Memory: earth.tj runs with an 8 GB heap. The elevation and land-cover files are read straight
   from disk (memory-mapped), so free memory beyond the heap also helps.
