@@ -1,0 +1,53 @@
+# Builds the mod on every push to main and keeps the newest jar on the "latest" release.
+# A tag such as v0.2.0 makes a release of its own with that jar.
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: ./gradlew build --no-daemon
+      - name: Pick the jar
+        id: jar
+        run: |
+          jar=$(ls build/libs/*.jar | grep -v -e '-sources' -e '-dev' | head -1)
+          echo "path=$jar" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jar
+          path: ${{ steps.jar.outputs.path }}
+
+      - name: Update the "latest" release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -f latest && git push -f origin latest
+          if ! gh release view latest >/dev/null 2>&1; then
+            gh release create latest --prerelease --title "Latest build" \
+              --notes "Built automatically from the newest commit on main. For a tested version, use the newest numbered release if there is one."
+          fi
+          for old in $(gh release view latest --json assets --jq '.assets[].name'); do gh release delete-asset latest "$old" -y; done
+          gh release upload latest "${{ steps.jar.outputs.path }}" --clobber
+
+      - name: Make a numbered release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" "${{ steps.jar.outputs.path }}" --title "${GITHUB_REF_NAME}" --generate-notes

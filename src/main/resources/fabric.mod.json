@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "earth_worldgen",
+  "version": "${version}",
+  "name": "Earth Worldgen",
+  "description": "Generates the real Earth from elevation data, chunk by chunk, as players explore.",
+  "authors": [
+    "Samuel Swauger"
+  ],
+  "contact": {
+    "homepage": "https://earth.tj",
+    "sources": "https://github.com/sams-minecraft-servers/earth-worldgen",
+    "issues": "https://github.com/sams-minecraft-servers/earth-worldgen/issues"
+  },
+  "license": "LGPL-3.0-only",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "tj.earth.worldgen.EarthWorldgen"
+    ]
+  },
+  "mixins": [
+    "earth_worldgen.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.0",
+    "minecraft": "~26.3",
+    "java": ">=25"
+  }
+}

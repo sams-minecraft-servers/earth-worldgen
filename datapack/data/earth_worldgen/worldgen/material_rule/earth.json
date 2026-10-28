@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:sequence",
+  "sequence": [
+    "earth_worldgen:veins/copper",
+    "earth_worldgen:veins/iron",
+    {
+      "type": "earth_worldgen:ground",
+      "surface": {
+        "type": "minecraft:condition",
+        "if_true": {
+          "type": "minecraft:above_preliminary_surface"
+        },
+        "then_run": "minecraft:overworld/surface"
+      },
+      "rock": "minecraft:stone",
+      "rock_depth": 64
+    }
+  ]
+}

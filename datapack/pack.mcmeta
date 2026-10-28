@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "Earth: the real planet, generated as it is explored (needs the earth_worldgen mod)",
+    "min_format": 121,
+    "max_format": 121
+  }
+}

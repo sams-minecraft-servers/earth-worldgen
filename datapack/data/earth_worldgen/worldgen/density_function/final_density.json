@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:clamp",
+  "min": -1.0,
+  "max": 1.0,
+  "input": {
+    "type": "minecraft:min",
+    "left": {
+      "type": "minecraft:add",
+      "left": "earth_worldgen:surface",
+      "right": {
+        "type": "minecraft:gradient",
+        "axis": "y",
+        "from_coordinate": -2032,
+        "from_value": 2032.0,
+        "to_coordinate": 2032,
+        "to_value": -2032.0
+      }
+    },
+    "right": {
+      "type": "earth_worldgen:below_ground",
+      "input": "earth_worldgen:caves",
+      "outside": 1.0,
+      "watertight": true
+    }
+  }
+}

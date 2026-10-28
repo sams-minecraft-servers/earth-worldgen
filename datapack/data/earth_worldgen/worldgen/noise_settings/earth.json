@@ -1,0 +1,23 @@
+{
+  "noise": {
+    "min_y": -2032,
+    "height": 4064
+  },
+  "default_block": "minecraft:deepslate",
+  "default_fluid": "minecraft:water",
+  "noise_router": {
+    "chunk_surface_level": "earth_worldgen:surface",
+    "final_density": "earth_worldgen:final_density",
+    "continents": 0.0,
+    "depth": 0.0,
+    "erosion": 0.0,
+    "ridges": 0.0,
+    "temperature": 0.0,
+    "vegetation": 0.0
+  },
+  "material_rule": "earth_worldgen:earth",
+  "spawn_target": [],
+  "sea_level": 160,
+  "disable_mob_generation": false,
+  "legacy_random_source": false
+}

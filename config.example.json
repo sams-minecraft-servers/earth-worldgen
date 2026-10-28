@@ -1,0 +1,32 @@
+{
+  "dataDir": "earth-data/elevation",
+  "landCoverDir": "earth-data/worldcover",
+  "horizontalScale": 5,
+  "metresPerBlockY": 5,
+  "seaLevel": 160,
+  "unknownSeaDepth": 6,
+  "urbanDir": "earth-data/urban",
+  "villagersPerCityChunk": 0.25,
+  "cities": {
+    "enabled": true,
+    "buildings": true,
+    "roads": true,
+    "villagers": true,
+    "disabledCountries": []
+  },
+  "monuments": {
+    "enabled": true,
+    "disabled": [],
+    "disabledCountries": [],
+    "extraFiles": []
+  },
+  "structures": {
+    "disabled": [
+      "minecraft:villages"
+    ]
+  },
+  "animals": {
+    "realRanges": true,
+    "axolotls": true
+  }
+}
