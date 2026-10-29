@@ -58,7 +58,7 @@ public final class Monuments {
         int bottom = chunk.getMinY(), top = chunk.getMaxY();
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (Monument m : here) {
-            if (settings.disabled.contains(m.id) || EarthConfig.listed(settings.disabledCountries, m.country)) continue;
+            if (switchedOff(settings, m) || EarthConfig.listed(settings.disabledCountries, m.country)) continue;
             int[] centre = centre(m);
             int cx = centre[0], cz = centre[1], base = base(m, cx, cz);
             short[] c = m.clear;
@@ -95,7 +95,7 @@ public final class Monuments {
         List<Monument> here = index().get(at.pack());
         if (here == null) return;
         for (Monument m : here) {
-            if (m.creatures.length == 0 || settings.disabled.contains(m.id) || EarthConfig.listed(settings.disabledCountries, m.country)) continue;
+            if (m.creatures.length == 0 || switchedOff(settings, m) || EarthConfig.listed(settings.disabledCountries, m.country)) continue;
             int[] centre = centre(m);
             int base = base(m, centre[0], centre[1]);
             for (int i = 0; i < m.creatures.length; i++) {
@@ -115,6 +115,13 @@ public final class Monuments {
                 region.addFreshEntityWithPassengers(entity);
             }
         }
+    }
+
+    /** Switched off by id (a monument's parts, "<id>_1", "<id>_2"..., go with it) or by country. */
+    private static boolean switchedOff(final EarthConfig.MonumentSettings settings, final Monument m) {
+        if (settings.disabled.contains(m.id) || EarthConfig.listed(settings.disabledCountries, m.country)) return true;
+        int cut = m.id.lastIndexOf('_');
+        return cut > 0 && m.id.substring(cut + 1).chars().allMatch(Character::isDigit) && settings.disabled.contains(m.id.substring(0, cut));
     }
 
     /** Every monument, for listing (id, name, country). */

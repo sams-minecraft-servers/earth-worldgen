@@ -89,25 +89,102 @@ public final class Terrain {
     private static int waterLevel(int blockX, int blockZ, float metres, int cover, boolean sea) {
         EarthConfig c = EarthConfig.get();
         if (!isWater(cover, metres)) return DRY;
-        return sea ? c.seaLevel : landY(c, stillWaterMetres(blockX, blockZ, metres));
+        return sea ? c.seaLevel : waterY(c, stillWaterMetres(blockX, blockZ, metres));
     }
 
     /**
-     * The height of a lake or river's surface. Water lies flat but the elevation data over it does
-     * not quite, so the surface is taken as the lowest reading on the water round about.
+     * The Y below which a lake or river at this many metres is water. Water within a block of sea
+     * level is level with the sea, so a river runs out into it without a step.
+     */
+    private static int waterY(EarthConfig c, float metres) {
+        return c.seaLevel + Math.max(0, (int) Math.floor(metres / c.metresPerBlockY));
+    }
+
+    /**
+     * The height of a lake or river's surface, in metres. Water lies flat, but the elevation data
+     * over it is noisy (a few metres either way), and taking each column's own reading leaves the
+     * surface in steps of a block or two that a boat can't get over. So the level is worked out
+     * once for each square of WATER_CELL blocks: the lowest of the smoothed readings on water
+     * within WATER_REACH squares. The squares along a river or across a lake share their lowest
+     * reading and so the same level; the level only steps down where the river really falls (or,
+     * on a steep river, follows it down, but never more than WATER_DROP_METRES under the reading
+     * there, so a mountain stream isn't sunk into a trench). Water that reaches the sea is at sea
+     * level all the way.
      */
     private static float stillWaterMetres(int blockX, int blockZ, float metres) {
-        float lowest = metres;
-        for (int r = 32; r <= 96; r += 64) {
-            for (int dx = -r; dx <= r; dx += r) {
-                for (int dz = -r; dz <= r; dz += r) {
-                    if ((dx == 0 && dz == 0) || cover(blockX + dx, blockZ + dz) != LandCover.WATER) continue;
-                    float m = metres(blockX + dx, blockZ + dz);
-                    if (m > SEA_MARGIN_METRES && m < lowest) lowest = m;
-                }
+        float level = flatWater(Math.floorDiv(blockX, WATER_CELL), Math.floorDiv(blockZ, WATER_CELL));
+        if (Float.isNaN(level)) return Float.isNaN(metres) ? 0 : metres; // a pond too small for the squares to see
+        return level;
+    }
+
+    private static final int WATER_CELL = 16, WATER_REACH = 12;
+    private static final float WATER_DROP_METRES = 8f;
+    private static final int WATER_CACHE = 1 << 15;
+    private record CellValue(long key, float value) {}
+    private static final CellValue[] SAMPLES = new CellValue[WATER_CACHE], SMOOTHED = new CellValue[WATER_CACHE], FLAT = new CellValue[WATER_CACHE];
+
+    private static long cellKey(final int cx, final int cz) {
+        return (long) cx << 32 | cz & 0xffffffffL;
+    }
+
+    private static int slot(final int cx, final int cz) {
+        return (cx * 0x9E3779B1 + cz * 0x85EBCA6B) >>> 17;
+    }
+
+    /** The reading at the middle of a square, if it is on water (0 for the sea, or anything within SEA_MARGIN_METRES of it); NaN on land. */
+    private static float sample(final int cx, final int cz) {
+        int at = slot(cx, cz);
+        long key = cellKey(cx, cz);
+        CellValue known = SAMPLES[at];
+        if (known != null && known.key == key) return known.value;
+        int x = cx * WATER_CELL + WATER_CELL / 2, z = cz * WATER_CELL + WATER_CELL / 2;
+        float value = Float.NaN;
+        int cover = cover(x, z);
+        float m = metres(x, z);
+        if (isWater(cover, m)) value = !(m > SEA_MARGIN_METRES) ? 0 : m;
+        SAMPLES[at] = new CellValue(key, value);
+        return value;
+    }
+
+    /** The mean of the water readings in a square and the eight around it: most of the data's noise gone. */
+    private static float smoothed(final int cx, final int cz) {
+        int at = slot(cx, cz);
+        long key = cellKey(cx, cz);
+        CellValue known = SMOOTHED[at];
+        if (known != null && known.key == key) return known.value;
+        float sum = 0;
+        int n = 0;
+        boolean sea = false;
+        for (int dz = -1; dz <= 1; dz++)
+            for (int dx = -1; dx <= 1; dx++) {
+                float v = sample(cx + dx, cz + dz);
+                if (Float.isNaN(v)) continue;
+                if (v == 0) sea = true;
+                sum += v;
+                n++;
             }
-        }
-        return lowest;
+        float value = n == 0 ? Float.NaN : sea ? 0 : sum / n;
+        SMOOTHED[at] = new CellValue(key, value);
+        return value;
+    }
+
+    /** The water level of a square (see stillWaterMetres); NaN when no water reading is near. */
+    private static float flatWater(final int cx, final int cz) {
+        int at = slot(cx, cz);
+        long key = cellKey(cx, cz);
+        CellValue known = FLAT[at];
+        if (known != null && known.key == key) return known.value;
+        float own = smoothed(cx, cz), lowest = Float.NaN;
+        for (int dz = -WATER_REACH; dz <= WATER_REACH; dz++)
+            for (int dx = -WATER_REACH; dx <= WATER_REACH; dx++) {
+                if (dx * dx + dz * dz > WATER_REACH * WATER_REACH) continue;
+                float v = smoothed(cx + dx, cz + dz);
+                if (!Float.isNaN(v) && !(v >= lowest)) lowest = v;
+            }
+        float value = lowest;
+        if (!Float.isNaN(own) && !Float.isNaN(lowest)) value = Math.max(lowest, own - WATER_DROP_METRES);
+        FLAT[at] = new CellValue(key, value);
+        return value;
     }
 
     /** The Y just above the top solid block of a column: blocks below it are ground. */
@@ -128,7 +205,7 @@ public final class Terrain {
             float bed = c.seaLevel - 1 + (float) (metres / c.metresPerBlockY);
             return Math.max(floor, Math.min(bed, c.seaLevel - inlandDepth(blockX, blockZ)));
         }
-        return Math.max(floor, landY(c, stillWaterMetres(blockX, blockZ, metres)) - inlandDepth(blockX, blockZ));
+        return Math.max(floor, waterY(c, stillWaterMetres(blockX, blockZ, metres)) - inlandDepth(blockX, blockZ));
     }
 
     /**

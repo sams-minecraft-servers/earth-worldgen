@@ -68,6 +68,7 @@ def resolve(projects, loader, mc):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
     if '--ores' in sys.argv: args.remove(sys.argv[sys.argv.index('--ores') + 1])
+    if '--config' in sys.argv: args.remove(sys.argv[sys.argv.index('--config') + 1])
     if len(args) < 2:
         sys.exit(__doc__)
     loader, mc, mods = args[0], args[1], args[2:]
@@ -95,6 +96,10 @@ def main():
         data = os.path.expanduser(data)
         config.update({'dataDir': os.path.join(data, 'elevation'), 'landCoverDir': os.path.join(data, 'worldcover'), 'urbanDir': os.path.join(data, 'urban'),
                        'download': {'elevation': False, 'landCover': False}})
+    # --config '{"monuments": {"disabled": [...]}}': more settings, merged in.
+    if '--config' in sys.argv:
+        for k, v in json.loads(sys.argv[sys.argv.index('--config') + 1]).items():
+            config[k] = {**config.get(k, {}), **v} if isinstance(v, dict) else v
     with open(os.path.join(run, 'config', 'earth-mod', 'earth_worldgen.json'), 'w') as f:
         json.dump(config, f)
 

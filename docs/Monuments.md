@@ -185,6 +185,8 @@ build it, and switching it off does not remove it.
 | `malwiya_minaret` | Malwiya Minaret | Iraq |
 | `azadi_tower` | Azadi Tower | Iran |
 | `bayterek_tower` | Bayterek Tower | Kazakhstan |
+| `semipalatinsk_test_site` | Semipalatinsk Test Site: the blast crater at the first Soviet atomic bomb's ground zero, with eight "geese" towers and six bunkers round it (`semipalatinsk_test_site_1` to `_14`; switching off the site switches them off too) | Kazakhstan |
+| `atomic_lake` | Atomic Lake (the Chagan crater, flooded) | Kazakhstan |
 | `registan` | Registan | Uzbekistan |
 | `neutrality_monument` | Neutrality Monument | Turkmenistan |
 | `burana_tower` | Burana Tower | Kyrgyzstan |
