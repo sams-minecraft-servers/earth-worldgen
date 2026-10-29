@@ -16,7 +16,8 @@ makes the land at the Eiffel Tower. The report says whether it started, what wen
 whether the Earth's land and the monument came out, which biomes and ores were made, and which
 mods were in. With --data, the map data is read from that folder and nothing is downloaded. With
 --biomes, land is also made at seven places of very different climates and each one's biomes are
-listed. --ores a,b counts blocks whose names contain a or b (default "_ore").
+listed. --ores a,b counts blocks whose names contain a or b (default "_ore"). With --world-type, the world is
+made with the Earth world type (level-type=earth_worldgen:earth, as singleplayer does) instead of the datapack.
 """
 import json, os, re, shutil, subprocess, sys, time, urllib.parse, urllib.request
 
@@ -90,8 +91,11 @@ def main():
         elif os.path.exists(src): shutil.copy(src, run)
     with open(os.path.join(run, 'server.properties'), 'w') as f:
         f.write('server-ip=127.0.0.1\nserver-port=25599\nlevel-name=world\nonline-mode=true\nview-distance=4\nsimulation-distance=4\nmax-tick-time=-1\nsync-chunk-writes=false\n')
+        # --world-type: the Earth world type (as on the Create World screen) instead of the datapack.
+        if '--world-type' in sys.argv: f.write('level-type=earth_worldgen\\:earth\n')
     os.makedirs(os.path.join(run, 'config', 'earth-mod'))
     config = {'download': {'maxMegabytesPerSecond': 4}}
+    if '--world-type' in sys.argv: config['installDatapack'] = False
     if data:
         data = os.path.expanduser(data)
         config.update({'dataDir': os.path.join(data, 'elevation'), 'landCoverDir': os.path.join(data, 'worldcover'), 'urbanDir': os.path.join(data, 'urban'),
@@ -132,7 +136,7 @@ def main():
     # What a person looking at the log would want to know.
     report = {'loader': loader, 'minecraft': mc, 'mods': installed, 'seconds': round(time.time() - started)}
     report['started'] = 'Done (' in log
-    report['earth_world'] = 'installed the mod\'s datapack' in log
+    report['earth_world'] = ('installed the mod\'s datapack' in log) if '--world-type' not in sys.argv else ('Earth: borders of' in log)
     report['villages_off'] = 'Could not find a structure of type "minecraft:village_plains"' in log
     report['mineshaft_found'] = 'nearest minecraft:mineshaft' in log
     problems = []

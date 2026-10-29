@@ -32,6 +32,20 @@ Fabric server launcher for this Minecraft version (https://fabricmc.net/use/serv
 `TEST_HEAP` (default 4G); the server runs under `tools/guard.sh` and is stopped after
 `TEST_TIMEOUT` (default 30m).
 
+## The smoke test
+
+`tools/smoke_test.py` needs only Python and Java 25, so it works on Linux, Windows and macOS. It
+downloads a Fabric or NeoForge server into a folder, starts it with the jar, makes an Earth world,
+checks it (spawn near Nairobi, strongholds spread out, no errors) and stops:
+
+```
+python tools/smoke_test.py fabric fabric/build/libs/earth-worldgen-fabric-<version>.jar /tmp/smoke                # the datapack, as a server owner would
+python tools/smoke_test.py neoforge neoforge/build/libs/earth-worldgen-neoforge-<version>.jar /tmp/smoke --world-type  # the world type, as singleplayer
+```
+
+`--data <folder>` reads map data already downloaded instead of fetching it. The GitHub build runs it
+with both jars, both ways, on all three systems before it updates any release.
+
 ## Looking at what was generated
 
 ```
@@ -50,6 +64,7 @@ places doesn't use up the machine's memory.
 | `common/src/main/java/tj/earth/worldgen/` | The mod, shared by every loader (see [How it works](How-it-works.md)) |
 | `common/src/main/java/tj/earth/worldgen/mixin/` | Where it hooks into the game's world generation |
 | `fabric/`, `neoforge/` | Each loader's entry point and mod information |
-| `datapack/` | Dimension, noise settings and structure changes that go in the world |
+| `datapack/` | Dimension, noise settings and structure changes that go in the world. Its `earth_worldgen` files are also copied into the jar as the mod's own data, for the world type |
+| `common/src/main/resources/data/` | The Earth world type and its place in the Create World list |
 | `tools/` | Data download and packing, test server, inspection tools |
 | `config.example.json` | Starting point for `config/earth-mod/earth_worldgen.json` |

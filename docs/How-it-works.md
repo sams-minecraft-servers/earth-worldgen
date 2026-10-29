@@ -53,10 +53,30 @@ place is from Y 64. The mixins apply this to:
 - buried ruined portals (`RuinedPortalStructureMixin`)
 - ocean monuments, which stand on the real sea bed (`OceanMonumentMixin`)
 
-The datapack spreads strongholds across the whole map, about one every 8,000 blocks, instead of
-ringing block 0, 0, which is open sea. `ChunkGeneratorStructureStateMixin` takes the structure sets
-switched off in the config (villages, by default) out of the Earth world's list, so they are neither
-made nor found by eyes of ender or `/locate`.
+Strongholds are spread across the whole map, about one every 8,000 blocks, instead of ringing
+block 0, 0, which is open sea. `ChunkGeneratorStructureStateMixin` does this for every Earth world
+(the datapack also says so), and takes the structure sets switched off in the config (villages, by
+default) out of the Earth world's list, so they are neither made nor found by eyes of ender or
+`/locate`.
+
+## The world type and the datapack
+
+There are two ways to make an Earth world, and they give the same world:
+
+- **The world type** `earth_worldgen:earth` (`data/earth_worldgen/worldgen/world_preset/earth.json`
+  in the jar, listed with the game's own types). Singleplayer uses it from the Create World screen;
+  a server uses it with `level-type`. Its overworld uses the mod's own dimension type
+  `earth_worldgen:earth`, so other worlds keep the game's.
+- **The datapack** (`datapack/`), which the mod puts into a new server world by itself. It replaces
+  the game's overworld, its height and the stronghold layout.
+
+The jar carries the datapack's own files (noise settings, density functions, ground rules) as the
+mod's data, so the world type needs no datapack. On Fabric without Fabric API, which is what
+normally loads a mod's data, `PackRepositoryMixin` adds the jar as an always-on built-in pack.
+
+The Earth biome source reads its list of biomes the first time it is used, not when it is made: the
+game makes one for the world type while it is still loading biomes, and asking then for a biome
+that isn't installed would stop the game loading.
 
 ## Monuments
 

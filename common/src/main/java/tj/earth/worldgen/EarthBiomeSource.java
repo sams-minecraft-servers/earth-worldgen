@@ -55,9 +55,11 @@ public final class EarthBiomeSource extends BiomeSource {
     private final List<List<Holder<Biome>>> kinds = new ArrayList<>();
     private final Map<String, Integer> kindIndex = new HashMap<>();
     private final int patch;
+    /** Kept until kinds is filled: see kinds(). */
+    private HolderGetter<Biome> biomeGetter;
+    private volatile boolean kindsRead;
 
     private EarthBiomeSource(final HolderGetter<Biome> biomes) {
-        Underground.earthWorld = true;
         this.ocean = biomes.getOrThrow(Biomes.OCEAN);
         this.deepOcean = biomes.getOrThrow(Biomes.DEEP_OCEAN);
         this.river = biomes.getOrThrow(Biomes.RIVER);
@@ -78,7 +80,26 @@ public final class EarthBiomeSource extends BiomeSource {
         EarthConfig.BiomeSettings settings = EarthConfig.get().biomes;
         this.classic = "classic".equalsIgnoreCase(settings.style);
         this.patch = Math.max(16, settings.patchBlocks);
-        if (!classic) readKinds(biomes, settings);
+        this.biomeGetter = biomes;
+    }
+
+    /**
+     * The biomes of each kind of place, read the first time they are wanted rather than when the
+     * biome source is made: the game also makes one for the Earth world type while it is still
+     * loading the biomes, and asking then for one that is not installed (a Terralith biome without
+     * Terralith) would leave a name with no biome behind it, which stops the game loading.
+     */
+    private List<List<Holder<Biome>>> kinds() {
+        if (!kindsRead) {
+            synchronized (this) {
+                if (!kindsRead) {
+                    readKinds(biomeGetter, EarthConfig.get().biomes);
+                    biomeGetter = null;
+                    kindsRead = true;
+                }
+            }
+        }
+        return kinds;
     }
 
     /** Fills kinds from biomes.json and the config: the first of custom, the mods' choice, the game's that has a biome that is installed. */
@@ -126,7 +147,14 @@ public final class EarthBiomeSource extends BiomeSource {
         List<Holder<Biome>> out = new ArrayList<>();
         for (String id : ids) {
             Identifier name = Identifier.tryParse(id.trim().toLowerCase(Locale.ROOT));
-            Optional<? extends Holder<Biome>> biome = name == null ? Optional.empty() : biomes.get(ResourceKey.create(Registries.BIOME, name));
+            Optional<? extends Holder<Biome>> biome;
+            try {
+                biome = name == null ? Optional.empty() : biomes.get(ResourceKey.create(Registries.BIOME, name));
+            } catch (IllegalStateException notThere) {
+                // The getter the world type was read with: once the biomes are loaded, it can't make a name for one it doesn't have.
+                biome = Optional.empty();
+            }
+            if (biome.isPresent() && !biome.get().isBound()) biome = Optional.empty();
             if (biome.isPresent()) out.add(biome.get());
             else if (warn) EarthWorldgen.LOG.warn("Earth: biome {} (for {}) is not installed; left out", id, kind);
         }
@@ -135,7 +163,7 @@ public final class EarthBiomeSource extends BiomeSource {
 
     @Override
     protected Stream<Holder<Biome>> collectPossibleBiomes() {
-        if (!classic) return Stream.concat(kinds.stream().flatMap(List::stream), Stream.of(plains)).distinct();
+        if (!classic) return Stream.concat(kinds().stream().flatMap(List::stream), Stream.of(plains)).distinct();
         return Stream.of(ocean, deepOcean, river, beach, plains, forest, taiga, jungle, savanna, desert, swamp, mangroves,
             meadow, stonyPeaks, frozenPeaks, snowyPlains, gravellyHills);
     }
@@ -203,7 +231,7 @@ public final class EarthBiomeSource extends BiomeSource {
 
     /** One of a kind's biomes: each patch of about patchBlocks (around scattered points, so the edges are uneven) gets one. */
     private Holder<Biome> pick(final String kind, final int blockX, final int blockZ) {
-        List<Holder<Biome>> choice = kinds.get(kindIndex.getOrDefault(kind, kindIndex.get("grassland")));
+        List<Holder<Biome>> choice = kinds().get(kindIndex.getOrDefault(kind, kindIndex.get("grassland")));
         if (choice.size() == 1) return choice.get(0);
         int cx = Math.floorDiv(blockX, patch), cz = Math.floorDiv(blockZ, patch);
         long best = Long.MAX_VALUE;

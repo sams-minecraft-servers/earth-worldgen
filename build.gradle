@@ -19,6 +19,15 @@ subprojects {
     processResources {
         dependsOn datapackZip
         from(layout.buildDirectory.dir('generated/datapack'))
+        // The same world-generation files as the mod's own data, so the "Earth" world type (Create
+        // World > World Type, or level-type=earth_worldgen:earth) works without the datapack. Only the
+        // mod's own names: the datapack's changes to the game's own entries (the overworld and its
+        // height, strongholds) stay in the datapack, so other worlds are left alone.
+        from(rootProject.file('datapack/data/earth_worldgen')) { into 'data/earth_worldgen' }
+        from(rootProject.file('datapack/data/minecraft/dimension_type/overworld.json')) {
+            into 'data/earth_worldgen/dimension_type'
+            rename { 'earth.json' }
+        }
         inputs.property 'version', project.version
         filesMatching(['fabric.mod.json', 'META-INF/neoforge.mods.toml']) { expand 'version': inputs.properties.version }
     }

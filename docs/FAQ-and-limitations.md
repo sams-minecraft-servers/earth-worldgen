@@ -4,13 +4,14 @@
 No. The mod runs on the server only; players join with the ordinary game.
 
 **Can I add it to an existing world?**
-No. The datapack must be in place before the world's first start, and existing chunks are never
-remade. Start a new world.
+No. A world is the Earth only if it was made as one (the Earth world type, or the mod's datapack
+before its first start), and existing chunks are never remade. Start a new world.
 
 **Does it work in single player?**
-It is built and tested as a server mod. A single-player world should work in principle (put the
-datapack in the world's folder when creating it, the config in the game folder's `config/`), but
-nobody has tried it.
+Yes. Install the mod on your game (Fabric or NeoForge), create a new world and choose **World Type:
+Earth** under **More**. Settings go in the game folder's `config/earth-mod/` and downloaded map data
+in its `earth-data/`. Your other worlds are left as they are: the mod only changes worlds made with
+the Earth world type.
 
 **Why is it so slow to generate new land?**
 Every new chunk reads real data and the world is 4,064 blocks tall. Exploring at walking or flying
@@ -35,7 +36,14 @@ Not without seams: existing chunks keep the old scale. Decide before players exp
 
 ## Known limitations
 
-- Used on one server only so far (earth.tj, Minecraft 26.3, Linux). Other setups are untested.
+- Minecraft 26.3 only for now. Older versions are planned.
+- Run for real on one server so far (earth.tj, Linux). Every build also starts a server with each
+  jar on Linux, Windows and macOS, both with the datapack and with the world type.
+- Played at the default 1:5 scale only. Other scales (`horizontalScale`, see
+  [Choosing a scale](Configuration.md#choosing-a-scale)) should work but haven't been played;
+  monuments keep their 1:5 size.
+- Some mods don't work with it, or have no 26.3 version yet; see [Compatibility](Compatibility.md).
+  Immersive Ores 26.3 can't start on a dedicated server at all.
 - The scripts in `tools/` assume Linux; `guard.sh` and `test-server.sh` need systemd.
 - Elevation data has gaps and artefacts in places (cliffs, steep valleys, some coasts). Water the
   data reads as high, such as ships or cranes, is still sea when the sea is close by.

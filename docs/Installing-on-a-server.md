@@ -17,9 +17,13 @@ has to be there before the world's first start, and chunks that already exist ar
 
 ## The short way
 
-Drop the jar into `mods/` of a Fabric server whose world does not exist yet, and start it. The mod
-installs its datapack into the new world, puts the spawn on land and downloads map data as players
-explore. The rest of this page is for setting things up by hand, or in advance.
+Drop the jar into `mods/` of a Fabric or NeoForge server whose world does not exist yet, and start
+it. The mod installs its datapack into the new world, puts the spawn on land and downloads map data
+as players explore. The rest of this page is for setting things up by hand, or in advance.
+
+Instead of the datapack, the world can be made with the mod's world type, as singleplayer does: set
+`level-type=earth_worldgen\:earth` in `server.properties` before the first start (and
+`installDatapack` to `false` if you don't want the datapack as well). Both give the same world.
 
 ## Steps
 

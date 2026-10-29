@@ -54,7 +54,7 @@ The file is read once, at start-up, so restart the server after editing it.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `installDatapack` | `true` | When the world does not exist yet, put the mod's datapack in its datapacks folder. |
+| `installDatapack` | `true` | On a server, when the world does not exist yet, put the mod's datapack in its datapacks folder (not needed with `level-type=earth_worldgen:earth`). |
 | `newWorldSpawn.latitude`, `.longitude` | `-1.2864`, `36.8172` | Where a new world's spawn goes (Nairobi). |
 | `download.elevation` | `true` | Download each elevation tile (5 to 25 MB) the first time land over it is made. |
 | `download.landCover` | `true` | Download each land cover tile (tens to hundreds of MB, 3 × 3 degrees) the first time it is needed. |

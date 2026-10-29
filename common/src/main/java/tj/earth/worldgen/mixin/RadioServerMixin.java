@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import tj.earth.worldgen.Radio;
 
-/** Runs the radio once a tick (starting it on the first), and saves the dial when the server stops. */
+/** Runs the radio once a tick (starting it on the first), and saves the dial when the server stops; forgets the world when it stops. */
 @Mixin(MinecraftServer.class)
 abstract class RadioServerMixin {
     @Unique private boolean earth$radioStarted;
@@ -27,5 +27,11 @@ abstract class RadioServerMixin {
     @Inject(method = "stopServer", at = @At("HEAD"))
     private void earth$radioSave(final CallbackInfo callback) {
         if (Radio.enabled()) Radio.saveDial();
+    }
+
+    /** In singleplayer the next world opened may not be Earth. */
+    @Inject(method = "stopServer", at = @At("TAIL"))
+    private void earth$forgetWorld(final CallbackInfo callback) {
+        tj.earth.worldgen.Underground.earthWorld = false;
     }
 }

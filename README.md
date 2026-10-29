@@ -1,6 +1,6 @@
 # Earth Worldgen
 
-A Fabric mod that turns a Minecraft world into the real Earth, made **as players explore it** from
+A Fabric and NeoForge mod that turns a Minecraft world into the real Earth, made **as players explore it** from
 real elevation and land-cover data, instead of from a pre-generated map download.
 
 At the default 1:5 scale, one block is 5 metres. Mountains, coastlines, rivers, lakes, forests,
@@ -40,9 +40,12 @@ any real place, or a latitude and longitude, into the block to go to.
 - **Everything can be switched.** Cities, buildings, roads, city villagers, each monument, each of
   the game's structures and the real animal ranges can be turned off in the config, and cities and
   monuments can be turned off country by country.
-- **Server side only.** Players need no mod, no resource pack and no client download.
+- **Server side only.** Players joining a server need no mod, no resource pack and no client
+  download. It also works in singleplayer, as a world type on the Create World screen.
 
 ## Quick start
+
+### On a server
 
 1. Install a **Fabric** or **NeoForge** server for Minecraft **26.3** (Java **25**).
 2. Drop the matching [mod jar](https://github.com/sams-minecraft-servers/earth-worldgen/releases/tag/latest)
@@ -57,6 +60,16 @@ A world that already exists is never changed: delete it (or set a new `level-nam
 Earth world. For a busy server, downloading the data in advance makes exploring smoother; see
 [Getting the data](docs/Getting-the-data.md).
 
+### In singleplayer
+
+1. Install **Fabric** (Fabric API is optional) or **NeoForge** for Minecraft **26.3**.
+2. Put the matching mod jar into the game's `mods/` folder.
+3. Create a new world, open **More** (World tab) and set **World Type** to **Earth**.
+
+You start in Nairobi. The map data for each area is downloaded the first time you go there: a few
+seconds for its elevation, up to a minute for its land cover (about 135 MB around your first spawn).
+New areas load slowly until their data is in.
+
 ## Documentation
 
 | Page | What it covers |
@@ -64,6 +77,7 @@ Earth world. For a busy server, downloading the data in advance makes exploring 
 | [Installing on a server](docs/Installing-on-a-server.md) | Setting up a new Earth world, step by step |
 | [Getting the data](docs/Getting-the-data.md) | Downloading and packing elevation, land cover and streets |
 | [Configuration](docs/Configuration.md) | Every setting in `earth_worldgen.json` |
+| [Biomes](docs/Biomes.md) | How biomes follow the real climate, and choosing your own |
 | [Monuments](docs/Monuments.md) | The monuments and their ids |
 | [Radio](docs/Radio.md) | Country radio: setting it up and its settings |
 | [Finding places](docs/Finding-places.md) | Converting latitude and longitude to block coordinates |
@@ -72,6 +86,7 @@ Earth world. For a busy server, downloading the data in advance makes exploring 
 | [Updating Minecraft](docs/Updating-Minecraft.md) | Moving the mod to a new game version |
 | [Compatibility](docs/Compatibility.md) | Which other mods it has been tested with |
 | [FAQ and limitations](docs/FAQ-and-limitations.md) | Known limits and what has not been tested |
+| [Changelog](CHANGELOG.md) | What changed in each version |
 
 ## Status
 

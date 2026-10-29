@@ -28,7 +28,11 @@ public final class Underground {
         void earth$vanillaHeights(boolean on);
     }
 
-    /** Whether this server's overworld is the Earth dimension (the datapack is in its world): set when its biome source is made. */
+    /**
+     * Whether the loaded world is an Earth world: set as its structures are set up
+     * (ChunkGeneratorStructureStateMixin), cleared when the server stops. Not when the biome source is
+     * made, as the game also makes one for the Earth world type on the Create World screen.
+     */
     public static volatile boolean earthWorld;
 
     private Underground() {}

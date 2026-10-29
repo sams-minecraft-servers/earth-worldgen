@@ -3,7 +3,8 @@
   "package": "tj.earth.worldgen.fabric.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "BuiltInRegistriesMixin"
+    "BuiltInRegistriesMixin",
+    "PackRepositoryMixin"
   ],
   "injectors": {
     "defaultRequire": 1
