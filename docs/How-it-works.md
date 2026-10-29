@@ -29,10 +29,14 @@ cutting into or beside a sea, lake or river bed, so caves near coasts don't floo
 
 ## Biomes
 
-**`EarthBiomeSource`** (`earth_worldgen:earth`) picks each place's biome from its real land cover
-(**`LandCover`**, ESA WorldCover at 10 m), read with its height and latitude: tropical forest becomes
-jungle, northern forest becomes taiga, bare ground becomes desert at low latitudes and stony peaks
-above the tree line, and so on. Where there is no land-cover data it goes by height and latitude alone.
+**`EarthBiomeSource`** (`earth_worldgen:earth`) sorts each place into a kind of real place
+("boreal_forest", "cold_steppe", "mediterranean_shrubland"...) from three maps: its land cover
+(**`LandCover`**, ESA WorldCover at 10 m), its climate (**`RealClimate`**, the Köppen-Geiger map at
+0.05°, packed into the jar by `tools/PackClimate.java`) and its height against the tree and snow
+lines. `earth_worldgen/biomes.json` lists each kind's biomes: the game's own, Terralith's and Biomes
+O' Plenty's. Those that are installed are used, and a kind with several biomes gives each one patches
+around scattered points, so the edges are uneven. The borders between climates are moved about a
+little so they don't follow the grid. See [Biomes](Biomes.md).
 
 ## Underground
 

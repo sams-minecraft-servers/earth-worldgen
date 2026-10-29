@@ -45,12 +45,14 @@ enable-rcon=false
 sync-chunk-writes=false
 max-tick-time=-1
 PROPS
+# Never wait for the disk after each chunk: the disk is shared, and syncing every write loads it heavily.
+if grep -q '^sync-chunk-writes=' "$RUN/server.properties"; then sed -i 's/^sync-chunk-writes=.*/sync-chunk-writes=false/' "$RUN/server.properties"; else echo sync-chunk-writes=false >> "$RUN/server.properties"; fi
 
 FIFO=$(mktemp -u) && mkfifo "$FIFO"
 trap 'rm -f "$FIFO"' EXIT
 # Fabric: fabric-server.jar. NeoForge: the argument file its installer writes (what its run.sh uses).
 if [ -s "$RUN/fabric-server.jar" ]; then LAUNCH="-jar fabric-server.jar"; else LAUNCH="@$(cd "$RUN" && ls libraries/net/neoforged/neoforge/*/unix_args.txt | head -1)"; fi
-( cd "$RUN" && GUARD_TIMEOUT=${TEST_TIMEOUT:-30m} exec "$ROOT/tools/guard.sh" "$LIMIT" java -Xmx$HEAP -Xms1G ${TEST_JAVA_OPTS:-} $LAUNCH --nogui < "$FIFO" > server.out 2>&1 ) &
+( cd "$RUN" && GUARD_TIMEOUT=${TEST_TIMEOUT:-30m} exec ionice -c2 -n7 "$ROOT/tools/guard.sh" "$LIMIT" java -Xmx$HEAP -Xms1G ${TEST_JAVA_OPTS:-} $LAUNCH --nogui < "$FIFO" > server.out 2>&1 ) &
 SERVER=$!
 exec 3> "$FIFO"
 for i in $(seq 1 180); do

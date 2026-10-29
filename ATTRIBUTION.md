@@ -28,6 +28,16 @@ ESA WorldCover 10 m 2021 v200, licensed under Creative Commons Attribution 4.0 I
 
 https://esa-worldcover.org
 
+## Climate: Köppen-Geiger classification
+
+The climate map packed into the mod (`climate.bin.gz`, made by `tools/PackClimate.java` from the
+1991–2020 1 km map, reduced to 0.05°) is from:
+
+Beck, H. E., T. R. McVicar, N. Vergopolan, A. Berg, N. J. Lutsko, A. Dufour, Z. Zeng, X. Jiang,
+A. I. J. M. van Dijk and D. G. Miralles. High-resolution (1 km) Köppen-Geiger maps for 1901–2099
+based on constrained CMIP6 projections. *Scientific Data* 10, 724 (2023).
+https://doi.org/10.1038/s41597-023-02549-6. Licence: [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
 ## Streets and buildings: Overture Maps (optional)
 
 Building outlines, roads and railways from Overture Maps, which draws on OpenStreetMap and other

@@ -55,6 +55,11 @@ def chunks(region_dir):
             raw = data[start + 5:start + 4 + length]
             yield read_nbt(zlib.decompress(raw) if kind == 2 else raw), length + 4
 
+def block_name(entry):
+    """A block palette entry's id: a plain string, a {Name, Properties} compound, or (in a list of mixed kinds) {"": name}."""
+    if isinstance(entry, str): return entry
+    return entry.get('Name') or entry.get('', '?')
+
 def unpack(longs, bits, count):
     per, mask, out = 64 // bits, (1 << bits) - 1, []
     for value in longs:

@@ -19,7 +19,9 @@ any real place, or a latitude and longitude, into the block to go to.
   elevation tiles, including the sea bed. Nothing is pre-generated: a tile is only read when a chunk
   over it is first made.
 - **Real biomes.** The biome at each place comes from its real land cover (forest, cropland, bare
-  rock, snow, water, built-up land), read with its height and latitude.
+  rock, snow, water, built-up land), its real climate (Köppen-Geiger) and its height: boreal forest
+  in Canada, steppe in Kazakhstan, Mediterranean scrub in Provence. With Terralith or Biomes O'
+  Plenty installed, their biomes are used where they fit. See [Biomes](docs/Biomes.md).
 - **Water where the maps put it.** The sea is at sea level, and lakes and rivers stand at their real
   heights. Land below sea level (the Dead Sea shore, the Netherlands) stays dry.
 - **A normal game underneath.** Ores, caves, geodes, mineshafts, strongholds, trial chambers and

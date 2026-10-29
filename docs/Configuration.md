@@ -36,6 +36,12 @@ The file is read once, at start-up, so restart the server after editing it.
   "animals": {
     "realRanges": true,
     "axolotls": true
+  },
+  "biomes": {
+    "style": "climate",
+    "modBiomes": true,
+    "patchBlocks": 320,
+    "custom": {}
   }
 }
 ```
@@ -121,6 +127,15 @@ Remove `"minecraft:villages"` from the list to get the game's villages as well.
 |---|---|---|
 | `animals.realRanges` | `true` | Animals in their real ranges: pandas in Sichuan, polar bears in the Arctic and so on. `false`: they spawn by biome, as in any world. |
 | `animals.axolotls` | `true` | Axolotls in Mexico City's lakes and canals. |
+
+## Biomes
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `biomes.style` | `"climate"` | `"climate"`: biomes follow the real climate, land cover and height (see [Biomes](Biomes.md)). `"classic"`: the way version 0.1 chose them; keep this for a world explored with 0.1, so new land matches the old. |
+| `biomes.modBiomes` | `true` | Use Terralith's and Biomes O' Plenty's biomes for the real places they fit, when those mods are installed. |
+| `biomes.patchBlocks` | `320` | Where a kind of place has several biomes, how big each one's patches are, in blocks. |
+| `biomes.custom` | `{}` | Your own biomes for any kind of place, from any mod: `{"boreal_forest": ["minecraft:taiga", "mymod:pine_forest"]}`. |
 
 ## Choosing a scale
 

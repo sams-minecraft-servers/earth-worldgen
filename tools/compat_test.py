@@ -13,8 +13,10 @@ mods that are not on Modrinth.
 The server is a copy of run-dnd/ (Fabric) or run-neoforge/ (NeoForge) with this repository's
 newly built jar for that loader. It makes a new world, looks for a village and a mineshaft, and
 makes the land at the Eiffel Tower. The report says whether it started, what went wrong in the log,
-whether the Earth's land and the monument came out, and which mods were in. With --data, the map
-data is read from that folder and nothing is downloaded.
+whether the Earth's land and the monument came out, which biomes and ores were made, and which
+mods were in. With --data, the map data is read from that folder and nothing is downloaded. With
+--biomes, land is also made at seven places of very different climates and each one's biomes are
+listed. --ores a,b counts blocks whose names contain a or b (default "_ore").
 """
 import json, os, re, shutil, subprocess, sys, time, urllib.parse, urllib.request
 
@@ -22,6 +24,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UA = {'User-Agent': 'earth-worldgen compatibility test (github.com/sams-minecraft-servers/earth-worldgen)'}
 BASE = {'fabric': 'run-dnd', 'neoforge': 'run-neoforge'}
 EIFFEL_CHUNK = (51072, -1087792, 51087, -1087777)
+BLOCKS_PER_DEGREE = 40_075_016.686 / 5 / 360
+# --biomes: places of very different climates, to see which biomes each gets.
+BIOME_PLACES = [('Quebec, Canada', 49.5, -73.5), ('Provence, France', 43.7, 5.5), ('Kazakh steppe', 50.5, 70.0),
+                ('Amazon rainforest', -3.5, -62.0), ('Grand Canyon floor', 36.1, -112.1), ('Louisiana', 29.9, -90.5),
+                ('Yakutia, Siberia', 61.5, 129.5)]
+
+def place_box(lat, lon, half=48):
+    x, z = round(lon * BLOCKS_PER_DEGREE), round(-lat * BLOCKS_PER_DEGREE)
+    return x - half, z - half, x + half, z + half
 
 def api(path):
     with urllib.request.urlopen(urllib.request.Request('https://api.modrinth.com/v2/' + path, headers=UA), timeout=30) as r:
@@ -56,7 +67,8 @@ def resolve(projects, loader, mc):
 
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith('--')]
-    if len(args) < 3:
+    if '--ores' in sys.argv: args.remove(sys.argv[sys.argv.index('--ores') + 1])
+    if len(args) < 2:
         sys.exit(__doc__)
     loader, mc, mods = args[0], args[1], args[2:]
     data = sys.argv[sys.argv.index('--data') + 1] if '--data' in sys.argv else None
@@ -64,7 +76,7 @@ def main():
     # --extra "cmd;cmd;wait 60": more console commands, run after the standard ones (e.g. a Chunky job)
     extra = sys.argv[sys.argv.index('--extra') + 1] if '--extra' in sys.argv else ''
     if extra in mods: mods.remove(extra)
-    name = 'run-compat-%s-%s' % (loader, '-'.join(os.path.basename(m).split('.')[0] for m in mods))[:80]
+    name = 'run-compat-%s-%s' % (loader, '-'.join(os.path.basename(m).split('.')[0] for m in mods) or 'alone')[:80]
     run = os.path.join(ROOT, name)
     base = os.path.join(ROOT, BASE[loader])
     if not os.path.isdir(base):
@@ -76,7 +88,7 @@ def main():
         if os.path.isdir(src): os.symlink(src, os.path.join(run, item))
         elif os.path.exists(src): shutil.copy(src, run)
     with open(os.path.join(run, 'server.properties'), 'w') as f:
-        f.write('server-ip=127.0.0.1\nserver-port=25599\nlevel-name=world\nonline-mode=true\nview-distance=4\nsimulation-distance=4\nmax-tick-time=-1\n')
+        f.write('server-ip=127.0.0.1\nserver-port=25599\nlevel-name=world\nonline-mode=true\nview-distance=4\nsimulation-distance=4\nmax-tick-time=-1\nsync-chunk-writes=false\n')
     os.makedirs(os.path.join(run, 'config', 'earth-mod'))
     config = {'download': {'maxMegabytesPerSecond': 4}}
     if data:
@@ -101,6 +113,10 @@ def main():
     with open(commands, 'w') as f:
         f.write('wait 5\nlocate structure minecraft:village_plains\nlocate structure minecraft:mineshaft\n'
                 'forceload add %d %d %d %d\nwait 75\nforceload remove all\nwait 5\n' % (x1, z1, x2, z2))
+        if '--biomes' in sys.argv:
+            for _, lat, lon in BIOME_PLACES:
+                f.write('forceload add %d %d %d %d\n' % place_box(lat, lon))
+            f.write('wait 120\nforceload remove all\nwait 5\n')
         for c in [c.strip() for c in extra.split(';') if c.strip()]:
             f.write(c + '\n')
     env = dict(os.environ, TEST_RUN=name, TEST_LOADER=loader, TEST_JAR_ONLY='1', TEST_TIMEOUT='15m')
@@ -127,6 +143,19 @@ def main():
     m = re.search(r"top blocks: (\{.*\})", top)
     report['top_blocks'] = m.group(1)[:300] if m else 'no finished chunks'
     report['monument_built'] = bool(m and 'gray_concrete' in m.group(1))
+    # Biomes and ores, over everything made and (with --biomes) at each test place.
+    region = os.path.join(run, 'world', 'dimensions', 'minecraft', 'overworld', 'region')
+    ores = sys.argv[sys.argv.index('--ores') + 1] if '--ores' in sys.argv else '_ore'
+    def chunk_report(*more):
+        out = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'chunk_report.py'), region, '--match', ores, '--json', *more],
+                             capture_output=True, text=True, timeout=600).stdout
+        try: return json.loads(out)
+        except ValueError: return {}
+    whole = chunk_report()
+    report['biomes'] = whole.get('biomes', {})
+    report['ores'] = whole.get('blocks', {})
+    if '--biomes' in sys.argv:
+        report['places'] = {name: chunk_report('--box', ','.join(map(str, place_box(lat, lon)))).get('biomes', {}) for name, lat, lon in BIOME_PLACES}
     print(json.dumps(report, indent=1))
     with open(os.path.join(run, 'report.json'), 'w') as f:
         json.dump(report, f, indent=1)

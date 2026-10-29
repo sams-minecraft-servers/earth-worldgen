@@ -3,6 +3,7 @@ package tj.earth.worldgen;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * How the real Earth is laid onto the world. Read once from config/earth-mod/earth_worldgen.json in the
@@ -75,6 +76,23 @@ public final class EarthConfig {
     public Structures structures = new Structures();
     /** Animals where they really live (see Fauna). */
     public Animals animals = new Animals();
+    /** Which biome each place gets (see EarthBiomeSource and docs/Biomes.md). */
+    public BiomeSettings biomes = new BiomeSettings();
+
+    public static final class BiomeSettings {
+        /**
+         * "climate": by the real climate (the Köppen-Geiger map), land cover and height, with the
+         * biomes in earth_worldgen/biomes.json. "classic": the mod's first way (land cover, height
+         * and latitude, only the game's biomes), for worlds explored before 0.2.
+         */
+        public String style = "climate";
+        /** Use the biomes of Terralith and Biomes O' Plenty where they fit real places, when those mods are installed. */
+        public boolean modBiomes = true;
+        /** Where a kind of place has several biomes, the size of the patches each one gets, in blocks. */
+        public int patchBlocks = 320;
+        /** Your own choice for any kind of place: kind -> biome ids, e.g. "boreal_forest": ["minecraft:taiga", "mymod:pine_forest"]. */
+        public Map<String, List<String>> custom = Map.of();
+    }
 
     public static final class Cities {
         /** false: no streets, buildings or city villagers anywhere. */
